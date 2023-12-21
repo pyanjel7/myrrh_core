@@ -1,6 +1,6 @@
 [project]
 name = "myrrh"
-description = "Myrrh is a Python development framework design to facilitate cloud processes and automations"
+description = "Myrrh is a Python development framework design to facilitate cloud processing and automation"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11.0"
