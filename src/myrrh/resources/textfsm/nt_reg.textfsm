@@ -1,0 +1,13 @@
+# reg
+#
+Value Required,Filldown hkey (H.+)
+Value vname ([^\s]?.*[^\s])
+Value value ([^\s]?.*[^\s])
+Value type (REG_SZ|REG_EXPAND_SZ|REG_BINARY|REG_DWORD|REG_MULTI_SZ|REG_NONE|REG_QWORD)
+
+Start
+#
+# ^.+ -> Continue
+ ^${hkey}
+ ^\s+${vname}\s+${type}(\s+${value})? -> Record 
+ ^ -> Record 

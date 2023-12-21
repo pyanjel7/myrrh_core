@@ -1,0 +1,7 @@
+include README.md
+include CHANGELOG.md
+include AUTHORS.md
+include COPYING
+include COPYRIGHT
+
+recursive-include docs *

@@ -1,0 +1,99 @@
+[project]
+name = "myrrh"
+description = "Myrrh is a Python development framework design to facilitate cloud processes and automations"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.11.0"
+
+dynamic = ["version"]
+
+authors = [
+  { name="PyAnjel7", email="pyanjel7@gmail.com" },
+]
+
+classifiers = [
+    "Framework :: Myrrh",
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: Myrrh",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Testers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Topic :: System :: Clustering",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Networking",
+    "Topic :: System :: System Administration",
+]
+
+dependencies = [
+    "colorama>=0.4",
+    "click>=8.1.2",
+    "prompt_toolkit>=3.0",
+    "ptpython>=3.0",
+    "textfsm>=1.1.2",
+    "pdoc>=10.0.4",
+    "pydantic>=2.4",
+    "cryptography>=41.0.1",
+]
+
+[project.urls]
+Source = "https://github.com/pyanjel7/myrrh_core"
+
+[project.scripts]
+myrrhc = "myrrh.tools.myrrhc:__main__"
+mtools = "myrrh.tools.mtools:__main__"
+
+[project.entry-points."myrrh.tools.myrrhc_ext"]
+"mplugins.myrrhc.bmy_ext" = "load_commands"
+"mplugins.myrrhc.man_ext" = "load_commands"
+"mplugins.myrrhc.alias_ext" = "load_commands"
+"mplugins.myrrhc.provider_ext" = "load_commands"
+
+"mplugins.provider.local.local_provider_ext" = "load_commands"
+
+[project.entry-points."myrrh.provider.registry"]
+"mplugins.provider.local-provider" = "register_provider"
+
+[project.entry-points."myrrh.framework.mlib"]
+"myrrh.framework.mpython-py" = "register_package"
+"myrrh.framework.mfs-fs" = "register_package"
+"myrrh.framework.msh-sh" = "register_package"
+
+[project.entry-points."myrrh.warehouse.registry"]
+"mplugins.provider.local-provider_settings" = "register_provider_model"
+
+[build-system]
+requires = [
+    "setuptools >= 61",
+    "setuptools_scm >= 6.4.2",
+    "wheel >= 0.37.0"
+]
+build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"myrrh.resources.textfsm" = [ "*.textfsm" ]
+
+[tool.setuptools_scm]
+write_to = "src/myrrh/__version__.py"
+
+[tool.black]
+line_length = 300
+
+[tool.codespell]
+ignore-words-list = "inout, crasher, invokations, worl, te"
+
+[tool.mypy]
+disable_error_code = ["import-untyped", "import-not-found", "abstract"]
+allow_redefinition = true
+namespace_packages = false
+files = [ "src" ]
