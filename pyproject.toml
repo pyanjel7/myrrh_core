@@ -12,15 +12,12 @@ authors = [
 ]
 
 classifiers = [
-    "Framework :: Myrrh",
     "Development Status :: 2 - Pre-Alpha",
-    "Framework :: Myrrh",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Intended Audience :: Developers",
-    "Intended Audience :: Testers",
     "Intended Audience :: System Administrators",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Testing",
@@ -28,7 +25,6 @@ classifiers = [
     "Topic :: System :: Distributed Computing",
     "Topic :: System :: Monitoring",
     "Topic :: System :: Networking",
-    "Topic :: System :: System Administration",
 ]
 
 dependencies = [
