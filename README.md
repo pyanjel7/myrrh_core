@@ -1,4 +1,4 @@
-About `Myrrh`?
+About `Myrrh`
 =============
 
 `Myrrh` is an open-source version and complete refactoring of a project originally designed for testing purposes. Using `Myrrh` does not necessarily require you to install Python on remote systems, or even an agent.
@@ -67,4 +67,4 @@ ctrl-D to exit console
 
 
 (myrrhc)
-```*
+```
