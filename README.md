@@ -1,11 +1,14 @@
 About `Myrrh`
 =============
+`Myrrh` is a Python development framework design to facilitate cloud processing and automation
 
-`Myrrh` is an open-source version and complete refactoring of a project originally designed for testing purposes. Using `Myrrh` does not necessarily require you to install Python on remote systems, or even an agent.
+`Myrrh` is an open-source version and complete refactoring of a project originally designed for testing purposes. 
+
+Using `Myrrh` does not necessarily require you to install Python on remote systems, or even an agent.
 
 `Myrrh` uses standard network protocols through its "provider" to realize operations on distant systems and is designed to be expandable.
 
-The `Myrrh` "0.*.*" versions are prototypes intended for project fine-tuning and provider developments.
+The `Myrrh` "0.1." versions are prototypes intended for project fine-tuning and provider developments.
 
 Requirements
 ============
