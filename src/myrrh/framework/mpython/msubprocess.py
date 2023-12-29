@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-
-#
-# Part of this code is inspirated from or is a direct copy of the python subprocess module
-#
-# The python subprocess module code is licenced under this terms:
-#
-# Copyright (c) 2003-2005 by Peter Astrand <astrand@lysator.liu.se>
-#
-# Licensed to PSF under a Contributor Agreement.
-# See http://www.python.org/2.4/license for licensing details.
-
 """
 **SubProcess management module**
 -----------
