@@ -135,7 +135,7 @@ class AbcSys(_interface, AbcRuntimeDelegate):
                 out, err, rval = self.myrrh_os.cmdb(
                     b'%s -c "import sys,json; print(json.dumps({n : getattr(sys, n) for n in %s if hasattr(sys, n) }))"'
                     % (
-                        mshlex.dquote(executable),
+                        mshlex.dquoteb(executable),
                         self.myrrh_os.shencode(self.attr_list),
                     )
                 )

@@ -154,7 +154,7 @@ def list2cmdlineb(seq, encode=os.fsencode, decode=os.fsdecode):
 _find_unsafe = re.compile(rb"[^\w@%\+=:,\./\-<>]", re.ASCII).search
 
 
-def quote(s):
+def quoteb(s):
     """Return a shell-escaped version of the string *s*."""
     if not s:
         return b"''"
@@ -166,7 +166,7 @@ def quote(s):
     return b"'" + s.replace(b"'", b"'\"'\"'") + b"'"
 
 
-def dquote(s):
+def dquoteb(s):
     """Return a shell-escaped version of the string *s*."""
     if not s:
         return b'""'
