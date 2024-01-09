@@ -1,7 +1,7 @@
 import typing
 import pydantic
 
-from myrrh.utils import secrets
+from myrrh.core.services import secrets
 
 from .item import BaseItem
 

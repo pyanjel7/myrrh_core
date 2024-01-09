@@ -5,7 +5,7 @@ __all__ = ["secret", "password"]
 
 
 class _F:
-    from myrrh.utils.secrets import set_key, clean_all_keys, clean_key_history, dump, backup_key, delete_key, use_key, rename_key, encrypt, decrypt  # type: ignore[misc]
+    from myrrh.core.services.secrets import set_key, clean_all_keys, clean_key_history, dump, backup_key, delete_key, use_key, rename_key, encrypt, decrypt  # type: ignore[misc]
 
     @classmethod
     def new_password(cls):

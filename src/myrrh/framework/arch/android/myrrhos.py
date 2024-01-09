@@ -75,7 +75,7 @@ class MyrrhOs(AbcMyrrhOs):
         return "surrogateescape"
 
     def sh_escape_bytes(self, string):
-        return mshlex.quote(string)
+        return mshlex.quoteb(string)
 
     def _localecode_(self):
         return ""
