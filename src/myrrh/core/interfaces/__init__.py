@@ -2,4 +2,4 @@
 
 from ._ientity import *
 from ._isystem import *
-from ._delegation import *
+from ...utils.delegation import *
