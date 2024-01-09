@@ -182,6 +182,26 @@ patternb = re.compile(rb"{(\w+)(?::([^}]*}))?}")
 
 
 def shcmdb(template: bytes, options: dict[bytes, bytes]):
+    """generate a command line using the template string
+
+    TEMPLATE= anystring|OPTIONAL|TEMPLATE
+    OPTIONAL = {KEY[:KEYPATTERN]}
+    KEY= str
+    KEYPATTERN = anystring|KEY|KEYPATTERN
+
+    examples:
+        template=b"ls {PATH}" with options={b'PATH': b'/path'} => b'ls /path'
+        template=b"ls {PATH}" with options={b'ANOTHER': b'/path'} => b'ls '
+        template=b"ls {PATH: -l {PATH}}" with options={b'PATH': b'/path'} => b'ls -l /path'
+        template=b"ls {PATH: -l {PATH}}" with options={b'ANOTHER': b'/path'} => b'ls '
+
+    Args:
+        template (bytes): commandline template
+        options (dict[bytes, bytes]): a dictionary with optional key value
+
+    Returns:
+        bytes: formatted command line
+    """
     cmd = template
     for opt in re.finditer(patternb, template):
         optname, optstring = opt.groups()
