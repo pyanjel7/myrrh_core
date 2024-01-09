@@ -176,3 +176,24 @@ def dquote(s):
     # use single quotes, and put single quotes into double quotes
     # the string $'b is then quoted as '$'"'"'b'
     return b'"' + s + b'"'
+
+
+patternb = re.compile(rb"{(\w+)(?::([^}]*}))?}")
+
+
+def shcmdb(template: bytes, options: dict[bytes, bytes]):
+    cmd = template
+    for opt in re.finditer(patternb, template):
+        optname, optstring = opt.groups()
+        optflag = b"{%s}" % optname
+        optstring = optstring or optflag
+
+        if optname in options:
+            optformatted = b"%%(%s)s" % optname
+            optformatted = optstring.replace(optflag, optformatted)
+            cmd = cmd.replace(opt.group(), optformatted)
+
+        else:
+            cmd = cmd.replace(opt.group(), b"")
+
+    return cmd % options
