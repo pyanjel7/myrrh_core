@@ -9,7 +9,7 @@ from myrrh.core.services.system import AbcRuntime
 from myrrh.framework.mpython import mimportlib
 
 
-from myrrh.resources.textfsm import getparser
+from myrrh.utils.mtextfsm import getparser
 
 __mlib__ = "WinReg"
 

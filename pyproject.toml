@@ -36,6 +36,7 @@ dependencies = [
     "pdoc>=10.0.4",
     "pydantic>=2.4",
     "cryptography>=41.0.1",
+    "tinydb>=4.8.0"
 ]
 
 [project.urls]
@@ -75,9 +76,6 @@ build-backend = "setuptools.build_meta:__legacy__"
 [tool.setuptools.packages.find]
 where = ["src"]
 namespaces = true
-
-[tool.setuptools.package-data]
-"myrrh.resources.textfsm" = [ "*.textfsm" ]
 
 [tool.setuptools_scm]
 write_to = "src/myrrh/__version__.py"
