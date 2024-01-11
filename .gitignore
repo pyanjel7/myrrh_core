@@ -163,3 +163,4 @@ cython_debug/
 .test*
 .vscode
 .myrrh_tests
+__version__.py
