@@ -5,7 +5,7 @@ import typing
 
 from myrrh.warehouse.item import NoneItem
 
-from ...services import cfg_init
+from ...services.config import cfg_init
 
 __all__ = ("Acquiring", "runtime_cached_property", "RuntimeCache", "init_cache")
 

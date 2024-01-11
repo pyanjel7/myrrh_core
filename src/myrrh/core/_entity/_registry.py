@@ -5,7 +5,7 @@ import weakref
 import pydantic
 
 from ..interfaces import IRegistry
-from ..services import cfg_init
+from ..services.config import cfg_init
 
 from ... import provider
 from ...warehouse.item import NoneItem

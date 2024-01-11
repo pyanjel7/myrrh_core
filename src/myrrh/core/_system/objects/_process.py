@@ -1,5 +1,5 @@
 from ...interfaces import IProcess, Stat, ICoreStreamService
-from ...services import cfg_init
+from ...services.config import cfg_init
 from ....provider import StatField
 
 from ._objects import RuntimeObject

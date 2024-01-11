@@ -2,7 +2,7 @@ import threading
 import os
 import stat
 
-from ...services import cfg_init
+from ...services.config import cfg_init
 from ...interfaces import IInOutStream, IInStream, IOutStream, ITask, ABCDelegation
 
 from ._objects import RuntimeObject

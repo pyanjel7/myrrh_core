@@ -1,7 +1,7 @@
 import importlib
 import typing
 
-from myrrh.core.services import load_ext_group
+from myrrh.core.services.config import load_ext_group
 from myrrh.core.services.entity import CoreProviderClass
 
 from ._iprovider import IProvider

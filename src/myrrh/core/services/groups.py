@@ -4,7 +4,7 @@ import functools
 
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from . import cfg_init
+from .config import cfg_init
 
 
 __all__ = (

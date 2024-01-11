@@ -1,6 +1,6 @@
 import pydantic
 import uuid as _uuid
-from myrrh.core.services import __version__
+from myrrh.core.services.config import __version__
 import typing
 
 from .item import BaseItem

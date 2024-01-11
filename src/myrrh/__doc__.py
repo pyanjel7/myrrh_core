@@ -1,24 +1,19 @@
-import myrrh.core.services
+from myrrh.core.services.config import __distname__, __version__, __license__, cfg_get
 
-__name__ = myrrh.core.services.__distname__.upper() + " Development Framework"
+__name__ = __distname__.upper() + " Development Framework"
 
-__doc__ = """
-    current version: %(version)s
+__doc__ = f"""
+    current version: {__version__}
 
-%(summary)s
+{cfg_get(section="@metadata@", key="Summary")}
 
-%(full_description)s
+{cfg_get(section="@metadata@", key="Description")}
 
 License
 =======
 
-%(license)s
+{__license__}
 
-""" % {
-    "summary": myrrh.core.services.cfg_get(section="@metadata@", key="Summary"),
-    "version": myrrh.core.services.__version__,
-    "full_description": myrrh.core.services.cfg_get(section="@metadata@", key="Description"),
-    "license": myrrh.core.services.__license__,
-}
+"""
 
 __docformat__ = "restructuredtext"

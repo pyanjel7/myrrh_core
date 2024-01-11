@@ -29,7 +29,7 @@ from ..objects import (
 )
 
 from ...services.entity import Entity
-from ...services import cfg_init
+from ...services.config import cfg_init
 from ....provider import Protocol as _Protocol, Wiring as _Wiring
 
 

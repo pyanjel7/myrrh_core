@@ -6,7 +6,7 @@ import tempfile
 import threading
 
 from myrrh.core.interfaces import abstractmethod
-from myrrh.core.services import PID, cfg_init
+from myrrh.core.services.config import PID, cfg_init
 from myrrh.core.services.system import AbcRuntime, FileException, _mlib_
 from ..mpython import _mosfs
 

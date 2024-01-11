@@ -3,7 +3,7 @@ import time
 import base64
 
 from cryptography import fernet
-from myrrh.core.services import cfg_get, cfg_set, cfg_del
+from .config import cfg_get, cfg_set, cfg_del
 
 __all__ = [
     "InvalidToken",

@@ -19,7 +19,7 @@ from ..interfaces import (
     ICoreFileSystemService,
     ICoreStreamService,
 )
-from ..services import cfg_init
+from ..services.config import cfg_init
 
 from ...warehouse.item import NoneItem
 from ...warehouse.registry import ItemRegistry

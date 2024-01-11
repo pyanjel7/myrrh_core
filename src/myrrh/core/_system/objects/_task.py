@@ -4,7 +4,7 @@ import typing
 
 from concurrent.futures import Future, CancelledError, InvalidStateError
 
-from ...services import log
+from ...services.logging import log
 from ...interfaces import ITask, IRuntimeTaskManager
 from ....utils import mtimer
 

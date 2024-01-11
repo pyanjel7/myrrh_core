@@ -14,7 +14,7 @@ import bmy
 from .exceptions import Abort, Exit, Failure, Reboot
 from . import completion
 
-from myrrh.core.services import (
+from myrrh.core.services.config import (
     cfg_get,
     cfg_init,
     __version__,

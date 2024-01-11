@@ -9,7 +9,7 @@ import functools
 from traceback import format_exc
 
 from myrrh import factory
-from myrrh.core.services import cfg_init
+from myrrh.core.services.config import cfg_init
 from myrrh.core.services.logging import log
 from myrrh.framework import Runtime
 from myrrh.utils import mshlex

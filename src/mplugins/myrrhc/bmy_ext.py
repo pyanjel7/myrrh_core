@@ -8,8 +8,8 @@ import prompt_toolkit
 import bmy
 
 from myrrh.utils import mstring
-from myrrh.core.services import log, myrrh_sys, cfg_get, cfg_set, cfg_del
-from myrrh.core.services import rebase as rebase_
+from myrrh.core.services.config import myrrh_sys, cfg_get, cfg_set, cfg_del, rebase as rebase_
+from myrrh.core.services.logging import log
 
 from myrrh.tools.myrrhc_ext import myrrhc_cmds, cmd
 from myrrh.tools.myrrhc import completion

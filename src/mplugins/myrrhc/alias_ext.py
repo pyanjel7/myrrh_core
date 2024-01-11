@@ -2,7 +2,7 @@ import re
 
 from myrrh.utils import mshlex
 
-from myrrh.core.services import cfg_init, cfg_get, cfg_del, cfg_set
+from myrrh.core.services.config import cfg_init, cfg_get, cfg_del, cfg_set
 
 from myrrh.tools.myrrhc_ext import myrrhc_cmds, cmd, getsession
 

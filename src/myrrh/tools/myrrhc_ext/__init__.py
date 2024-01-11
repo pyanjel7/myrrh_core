@@ -1,7 +1,7 @@
 import importlib
 import typing
 
-from myrrh.core.services import load_ext_group
+from myrrh.core.services.config import load_ext_group
 from ..myrrhc import cmd, types  # noqa: F401
 from ..myrrhc.cmd import myrrhc_cmds  # noqa: F401
 

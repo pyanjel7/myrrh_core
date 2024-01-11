@@ -3,7 +3,7 @@ import pprint
 
 
 class _F:
-    from myrrh.core.services import cfg_get, cfg_set, cfg_del  # type: ignore[misc]
+    from myrrh.core.services.config import cfg_get, cfg_set, cfg_del  # type: ignore[misc]
 
     @staticmethod
     def dump(key, value, section, overwrite):

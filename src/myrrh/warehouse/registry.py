@@ -3,7 +3,7 @@ import typing
 import pydantic
 import functools
 
-from myrrh.core.services import load_ext_group
+from myrrh.core.services.config import load_ext_group
 
 from .item import BaseItem, NoneItemType, GenericItem
 from ._system import System

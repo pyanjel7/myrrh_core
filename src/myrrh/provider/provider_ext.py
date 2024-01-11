@@ -1,5 +1,5 @@
 from myrrh.tools.myrrhc_ext import myrrhc_cmds, cmd
-from myrrh.provider.registry import ProviderRegisry
+from myrrh.provider.registry import ProviderRegistry
 
 
 @myrrhc_cmds.group()
@@ -11,5 +11,5 @@ def provider():
 @provider.command()
 def list():
     "List all installed providers"
-    for name in sorted(ProviderRegisry().providers, key=lambda n: n[0]):
-        cmd.info("%s\t\t%s" % (name, ProviderRegisry().get_version(name)))
+    for name in sorted(ProviderRegistry().providers, key=lambda n: n[0]):
+        cmd.info("%s\t\t%s" % (name, ProviderRegistry().get_version(name)))

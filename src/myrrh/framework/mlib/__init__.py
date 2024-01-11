@@ -1,4 +1,4 @@
-from myrrh.core.services import load_ext_group
+from myrrh.core.services.config import load_ext_group
 from . import _mlib
 
 

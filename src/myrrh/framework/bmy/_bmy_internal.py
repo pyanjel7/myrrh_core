@@ -4,7 +4,9 @@ import threading
 
 from functools import wraps
 
-from myrrh.core.services import groups, cfg_init
+from myrrh.core.services import groups
+from myrrh.core.services.config import cfg_init
+
 from myrrh.core.services.logging import log
 
 from ._bmy_exceptions import BmyInvalidEid, BmyEidInUsed

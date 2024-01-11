@@ -8,7 +8,7 @@ import pathlib
 import webbrowser
 
 
-from myrrh.core.services import cfg_get
+from myrrh.core.services.config import cfg_get
 
 from myrrh.tools.myrrhc_ext import myrrhc_cmds, cmd
 

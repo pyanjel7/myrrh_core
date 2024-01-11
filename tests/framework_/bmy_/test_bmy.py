@@ -4,7 +4,7 @@ import os
 
 import bmy
 
-from myrrh.core.services import log
+from myrrh.core.services.logging import log
 from myrrh.utils.myrrh_test_init import setUp
 
 setUp(f"bmy.{os.path.basename(__file__)}")

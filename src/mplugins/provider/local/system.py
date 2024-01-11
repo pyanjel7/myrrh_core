@@ -20,7 +20,7 @@ from myrrh.provider import (
 
 from myrrh.utils.mhandle import LightHandler
 
-from myrrh.core.services import cfg_init
+from myrrh.core.services.config import cfg_init
 
 
 def _working_dir(cwd):

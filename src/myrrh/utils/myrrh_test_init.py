@@ -1,7 +1,7 @@
 import bmy
 import os
 
-from myrrh.core.services import cfg_init
+from myrrh.core.services.config import cfg_init
 
 __all__ = ("setUp", "setUpModule", "tearDownModule")
 

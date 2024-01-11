@@ -23,7 +23,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 
 import bmy
 
-from myrrh.core.services import cfg_get
+from myrrh.core.services.config import cfg_get
 from myrrh.core.services.logging import log
 
 from myrrh.utils import mshlex

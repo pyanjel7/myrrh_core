@@ -1,7 +1,7 @@
 """Shared OS X support functions."""
 import re
 
-from myrrh.core.services import PID
+from myrrh.core.services.config import PID
 from myrrh.core.services.system import AbcRuntime, _mlib_
 from . import mimportlib
 

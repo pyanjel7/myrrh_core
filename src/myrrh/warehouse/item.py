@@ -6,7 +6,7 @@ import datetime
 import pydantic
 import pydantic.json
 
-from myrrh.core.services import cfg_init
+from myrrh.core.services.config import cfg_init
 
 __all__ = ["NoneItem", "BaseItem", "GenericItem", "NoneItemType"]
 
