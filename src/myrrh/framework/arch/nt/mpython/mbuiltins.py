@@ -7,4 +7,4 @@ class Builtins(AbcBuiltins):
     try:
         from builtins import WindowsError  # type: ignore[attr-defined]
     except ImportError:
-        WindowsError = OSError
+        WindowsError: type[OSError] = OSError  # type: ignore[no-redef]

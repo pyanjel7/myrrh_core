@@ -5,7 +5,7 @@ _dir = importlib.resources.files("myrrh.resources.textfsm")
 
 
 def getparser(name):
-    with open(_dir / '.'.join((name, "textfsm"))) as f:
+    with open(_dir / ".".join((name, "textfsm"))) as f:
         return Context(textfsm.TextFSM(f))
 
 
