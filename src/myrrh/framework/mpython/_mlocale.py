@@ -1,4 +1,4 @@
-from myrrh.core.interfaces import abstractmethod
+from myrrh.utils.delegation import abstractmethod
 from myrrh.core.objects.system import AbcRuntimeDelegate
 
 __mlib__ = "Abc_Locale"

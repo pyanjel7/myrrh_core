@@ -3,9 +3,10 @@ import sys
 import threading
 import typing
 
-from myrrh.core.interfaces import ICoreStreamService
+from ....utils.delegation import ABCDelegation
 
 from ...interfaces import (
+    ICoreStreamService,
     IFileInOutStream,
     IFileInStream,
     IFileOutStream,
@@ -14,7 +15,6 @@ from ...interfaces import (
     ITask,
     IRuntimeObject,
     Stat,
-    ABCDelegation,
 )
 
 from ....provider import Whence, StatField

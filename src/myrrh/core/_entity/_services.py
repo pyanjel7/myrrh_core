@@ -1,9 +1,5 @@
-from ..interfaces import (
-    ABCDelegation,
-    ICoreFileSystemService,
-    ICoreStreamService,
-    ICoreShellService,
-)
+from ...utils.delegation import ABCDelegation
+from ..interfaces import ICoreFileSystemService, ICoreStreamService, ICoreShellService
 
 __all__ = ["ShellService", "FileSystemService", "StreamService"]
 

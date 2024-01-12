@@ -5,12 +5,11 @@ import typing
 
 from mplugins.provider.local import provider
 
+from ...utils.delegation import NoneDelegation, ABCDelegation, ABCDelegationMeta
+
 from ..interfaces import (
     ICoreService,
-    NoneDelegation,
     ISystem,
-    ABCDelegation,
-    ABCDelegationMeta,
     IRegistry,
     ICoreSnapService,
     ICoreInstanceService,

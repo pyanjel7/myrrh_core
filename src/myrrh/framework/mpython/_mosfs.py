@@ -11,7 +11,7 @@ from os import PathLike
 from collections import namedtuple
 
 
-from myrrh.core.interfaces import abstractmethod
+from myrrh.utils.delegation import abstractmethod
 from myrrh.core.objects.system import (
     MOsError,
     MIOException,

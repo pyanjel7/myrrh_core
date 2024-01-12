@@ -3,7 +3,7 @@ import typing
 
 import mlib
 
-from myrrh.core.interfaces import abstractmethod, ABC
+from myrrh.utils.delegation import abstractmethod, ABC
 from myrrh.core.objects.system import AbcRuntimeDelegate, _mlib_
 
 __mlib__ = "AbcImportLib"

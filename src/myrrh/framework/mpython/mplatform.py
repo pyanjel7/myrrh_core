@@ -1,6 +1,6 @@
 import typing
 
-from myrrh.core.interfaces import abstractmethod, ABC
+from myrrh.utils.delegation import abstractmethod, ABC
 from myrrh.core.objects.system import AbcRuntimeDelegate
 
 from . import mbuiltins

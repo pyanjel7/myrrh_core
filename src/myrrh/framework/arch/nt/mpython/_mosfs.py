@@ -12,7 +12,7 @@ from myrrh.core.objects.system import (
     ExecutionFailureCauseErr,
     _mlib_,
 )
-from myrrh.core.interfaces import ABCDelegation, ABC, abstractmethod
+from myrrh.utils.delegation import ABCDelegation, ABC, abstractmethod
 
 from myrrh.framework.mpython import mbuiltins
 from myrrh.framework.mpython._mosfs import AbcOsFs, stat_result

@@ -9,7 +9,7 @@ from myrrh.core.objects.system import (
     MOsError,
     AbcRuntimeDelegate,
 )
-from myrrh.core.interfaces import ABC
+from myrrh.utils.delegation import ABC
 
 from myrrh.framework.mpython._mosfs import AbcOsFs, stat_result
 

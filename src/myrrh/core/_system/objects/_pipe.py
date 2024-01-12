@@ -2,8 +2,10 @@ import threading
 import os
 import stat
 
+from ....utils.delegation import ABCDelegation
+
 from ...services.config import cfg_init
-from ...interfaces import IInOutStream, IInStream, IOutStream, ITask, ABCDelegation
+from ...interfaces import IInOutStream, IInStream, IOutStream, ITask
 
 from ._objects import RuntimeObject
 
