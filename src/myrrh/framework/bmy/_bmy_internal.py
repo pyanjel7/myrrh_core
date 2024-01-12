@@ -4,7 +4,7 @@ import threading
 
 from functools import wraps
 
-from myrrh.core.services import groups
+from myrrh.core.objects import groups
 from myrrh.core.services.config import cfg_init
 
 from myrrh.core.services.logging import log

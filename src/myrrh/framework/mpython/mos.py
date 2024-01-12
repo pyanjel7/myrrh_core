@@ -1,6 +1,6 @@
 import builtins
 
-from myrrh.core.services.system import ImplPropertyClass, _mlib_, AbcRuntimeDelegate
+from myrrh.core.objects.system import ImplPropertyClass, _mlib_, AbcRuntimeDelegate
 
 from . import _mosenv, _mosfs, _mosfile, _mosprocess, mimportlib, msys
 from myrrh.framework.mfs import madvfs
@@ -22,7 +22,7 @@ class AbcOs(_mlib_(_mosenv), _mlib_(_mosfile), _mlib_(_mosfs), _mlib_(_mosproces
     import os as local_os
     import stat as st
 
-    from myrrh.core.services.system import MOsError
+    from myrrh.core.objects.system import MOsError
     from ._mosfs import stat_result
 
     osenv = mimportlib.module_property(_mosenv)

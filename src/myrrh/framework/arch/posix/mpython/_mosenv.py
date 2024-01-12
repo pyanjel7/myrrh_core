@@ -1,7 +1,7 @@
 import functools
 
 from myrrh.framework.mpython._mosenv import AbcOsEnv
-from myrrh.core.services.system import ExecutionFailureCauseRVal
+from myrrh.core.objects.system import ExecutionFailureCauseRVal
 
 __mlib__ = "OsEnv"
 

@@ -4,7 +4,7 @@ import threading
 import importlib
 import re
 
-from myrrh.core.services.system import _mlib_
+from myrrh.core.objects.system import _mlib_
 
 _lock = threading.RLock()
 

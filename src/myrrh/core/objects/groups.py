@@ -4,7 +4,7 @@ import functools
 
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from .config import cfg_init
+from ..services.config import cfg_init
 
 
 __all__ = (
@@ -93,8 +93,8 @@ class MyrrhGroupPropertyASync:
 
 
 class MyrrhGroupMeta(type):
-    __async__ = cfg_init("group_threaded", False, section="myrrh.core.services.system")
-    __max_workers__ = cfg_init("group_max_concurrent_threads", 5, section="myrrh.core.services.system")
+    __async__ = cfg_init("group_threaded", False, section="myrrh.core.objects")
+    __max_workers__ = cfg_init("group_max_concurrent_threads", 5, section="myrrh.core.objects")
 
     def __prepare__(name, bases, *, namedtuple_, async_=None):
         _dict = dict()

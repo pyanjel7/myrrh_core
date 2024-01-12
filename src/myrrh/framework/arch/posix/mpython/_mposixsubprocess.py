@@ -1,6 +1,6 @@
 import typing
 
-from myrrh.core.services.system import AbcRuntime
+from myrrh.core.objects.system import AbcRuntime
 
 __mlib__ = "AbcPosixSubprocess"
 

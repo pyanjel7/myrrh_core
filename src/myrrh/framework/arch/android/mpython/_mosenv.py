@@ -1,6 +1,6 @@
 import functools
 
-from myrrh.core.services.system import ExecutionFailureCauseRVal
+from myrrh.core.objects.system import ExecutionFailureCauseRVal
 
 from myrrh.framework.mpython._mosenv import AbcOsEnv
 

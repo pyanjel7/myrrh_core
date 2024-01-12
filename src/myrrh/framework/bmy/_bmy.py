@@ -18,7 +18,7 @@ from myrrh.utils.filemode import filemode
 from myrrh.framework.msh import madvsh
 
 from myrrh.core.interfaces import IHost
-from myrrh.core.services import groups
+from myrrh.core.objects import groups
 
 from ._bmy_internal import entities
 from ._bmy_entity import BmyEntity

@@ -8,7 +8,7 @@ import os
 from myrrh.utils.mstring import typestr
 
 from myrrh.core.interfaces import abstractmethod
-from myrrh.core.services.system import AbcRuntime
+from myrrh.core.objects.system import AbcRuntime
 
 __mlib__ = "AbcOsEnv"
 

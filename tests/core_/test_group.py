@@ -1,6 +1,6 @@
 import unittest
 
-from myrrh.core.services.groups import MyrrhGroup, myrrh_group
+from myrrh.core.objects.groups import MyrrhGroup, myrrh_group
 
 
 class TestGroup(unittest.TestCase):

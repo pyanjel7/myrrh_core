@@ -1,5 +1,5 @@
 from myrrh.framework.mfs.madvfs import AbcAdvFs
-from myrrh.core.services.system import ExecutionFailureCauseRVal
+from myrrh.core.objects.system import ExecutionFailureCauseRVal
 
 __mlib__ = "AdvFs"
 

@@ -2,7 +2,7 @@
 import unittest
 import bmy
 
-from myrrh.core.services.groups import MyrrhGroup
+from myrrh.core.objects.groups import MyrrhGroup
 
 
 class TestBuild(unittest.TestCase):

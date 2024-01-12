@@ -4,7 +4,7 @@ import typing
 from concurrent.futures import CancelledError
 
 from myrrh.core.services.config import PID
-from myrrh.core.services.system import AbcRuntime, Protocol
+from myrrh.core.objects.system import AbcRuntime, Protocol
 from myrrh.utils import mshlex
 
 

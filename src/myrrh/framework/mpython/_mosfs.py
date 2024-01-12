@@ -12,7 +12,7 @@ from collections import namedtuple
 
 
 from myrrh.core.interfaces import abstractmethod
-from myrrh.core.services.system import (
+from myrrh.core.objects.system import (
     MOsError,
     MIOException,
     AbcRuntime,

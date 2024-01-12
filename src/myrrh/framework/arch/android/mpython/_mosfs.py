@@ -2,7 +2,7 @@ import errno
 import stat
 import time
 import os
-from myrrh.core.services.system import ExecutionFailureCauseRVal, MOsError, supportedif
+from myrrh.core.objects.system import ExecutionFailureCauseRVal, MOsError, supportedif
 
 from myrrh.framework.mpython._mosfs import AbcOsFs, stat_result
 import posixpath

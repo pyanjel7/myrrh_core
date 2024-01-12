@@ -4,7 +4,7 @@ import typing
 import json
 
 from myrrh.warehouse.item import NoneItem
-from myrrh.core.services.entity import Entity, CoreProvider
+from myrrh.core.objects.entity import Entity, CoreProvider
 from myrrh.provider import IProvider
 
 from myrrh.provider.registry import ProviderRegistry

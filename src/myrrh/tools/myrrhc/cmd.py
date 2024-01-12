@@ -23,7 +23,7 @@ from myrrh.core.services.config import (
     PID,
 )
 from myrrh.core.services.logging import log
-from myrrh.core.services.groups import myrrh_group_keys
+from myrrh.core.objects.groups import myrrh_group_keys
 
 from prompt_toolkit.shortcuts import print_container
 from prompt_toolkit.formatted_text import to_formatted_text, ANSI
@@ -76,7 +76,7 @@ class EidOuput:
                     width=max_line_len,
                 )
 
-                lines = lines[rows - 1 :]
+                lines = lines[rows - 1:]
 
                 bodies[e].append(header and [header, body] or [body])
                 header = None
@@ -186,7 +186,7 @@ def print_table(message, cols, *args, **kwargs):
         expand_sz = sz + 4
 
         if len(s) >= txt_sz:
-            s = s[0] + s[1 : txt_sz - 4] + "..." + s[-1]
+            s = s[0] + s[1: txt_sz - 4] + "..." + s[-1]
 
         line = "".join([line, ("%s\t" % s).expandtabs(expand_sz)])
 

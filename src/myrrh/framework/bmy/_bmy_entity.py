@@ -1,7 +1,7 @@
 import threading
 
 from myrrh import factory
-from myrrh.core.services import groups
+from myrrh.core.objects import groups
 from myrrh.framework import Runtime
 
 from ._bmy_exceptions import BmyNotReady

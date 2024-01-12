@@ -2,7 +2,7 @@ import importlib
 import typing
 
 from myrrh.core.services.config import load_ext_group
-from myrrh.core.services.entity import CoreProviderClass
+from myrrh.core.objects.entity import CoreProviderClass
 
 from ._iprovider import IProvider
 
@@ -39,7 +39,7 @@ class ProviderRegistry:
 
     def name_from_dist(self, dist_name: str) -> str:
         if self.is_provider_dist(dist_name):
-            return dist_name[len(self.provider_prefix) + 1 :]
+            return dist_name[len(self.provider_prefix) + 1:]
         return ""
 
     def get_version(self, provider_name: str) -> str:

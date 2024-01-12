@@ -3,7 +3,7 @@ import json
 import typing
 
 from myrrh.core.interfaces import abstractmethod, ABC
-from myrrh.core.services.system import AbcRuntimeDelegate, ExecutionFailureCauseRVal
+from myrrh.core.objects.system import AbcRuntimeDelegate, ExecutionFailureCauseRVal
 from myrrh.utils import mshlex
 
 __mlib__ = "AbcSys"

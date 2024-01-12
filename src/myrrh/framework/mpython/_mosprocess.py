@@ -8,7 +8,7 @@ import signal
 
 # from myrrh.utils import getch
 
-from myrrh.core.services.system import MOsError, AbcRuntime, ImplPropertyClass
+from myrrh.core.objects.system import MOsError, AbcRuntime, ImplPropertyClass
 
 from . import mimportlib
 

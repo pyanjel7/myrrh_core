@@ -3,9 +3,9 @@ import threading
 from myrrh.utils import mshlex
 
 from myrrh.utils import mstring
-from myrrh.core.services.system import ExecutionFailureCauseRVal
+from myrrh.core.objects.system import ExecutionFailureCauseRVal
 
-from myrrh.core.services.system import AbcRuntime
+from myrrh.core.objects.system import AbcRuntime
 from myrrh.framework.mpython import mimportlib
 
 

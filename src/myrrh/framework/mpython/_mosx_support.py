@@ -2,7 +2,7 @@
 import re
 
 from myrrh.core.services.config import PID
-from myrrh.core.services.system import AbcRuntime, _mlib_
+from myrrh.core.objects.system import AbcRuntime, _mlib_
 from . import mimportlib
 
 __mlib__ = "Abc_Osx_support"

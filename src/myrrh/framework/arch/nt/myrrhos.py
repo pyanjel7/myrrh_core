@@ -1,7 +1,7 @@
 import re
 import functools
 
-from myrrh.core.services.system import AbcMyrrhOs, ExecutionFailureCauseRVal
+from myrrh.core.objects.system import AbcMyrrhOs, ExecutionFailureCauseRVal
 from myrrh.utils import merrno
 from myrrh.utils.mstring import str2int
 from myrrh.utils import mshlex

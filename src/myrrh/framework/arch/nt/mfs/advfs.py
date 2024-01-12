@@ -2,7 +2,7 @@ import ntpath
 
 from myrrh.utils import mstring
 from myrrh.framework.mfs.madvfs import AbcAdvFs
-from myrrh.core.services.system import (
+from myrrh.core.objects.system import (
     ExecutionFailureCauseRVal,
     ExecutionFailureCauseErr,
 )

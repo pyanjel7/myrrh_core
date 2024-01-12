@@ -2,7 +2,7 @@ import errno
 import array
 import os
 
-from myrrh.core.services.system import MIOException, AbcRuntime
+from myrrh.core.objects.system import MIOException, AbcRuntime
 
 from . import mimportlib
 

@@ -14,7 +14,7 @@ import weakref
 from myrrh.utils import mtimer, mshlex
 
 from myrrh.core.interfaces import IInStream, IProcess
-from myrrh.core.services.system import AbcRuntime, InheritedPropertyClass
+from myrrh.core.objects.system import AbcRuntime, InheritedPropertyClass
 from myrrh.utils import mstring
 
 __mlib__ = "AbcAdvSh"

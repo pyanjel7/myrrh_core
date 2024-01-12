@@ -10,7 +10,7 @@ The function translate(PATTERN) returns a regular expression
 corresponding to PATTERN.  (It does not compile it.)
 """
 from myrrh.core.interfaces import abstractmethod, ABC
-from myrrh.core.services.system import AbcRuntimeDelegate
+from myrrh.core.objects.system import AbcRuntimeDelegate
 from . import mbuiltins
 
 __mlib__ = "AbcFnmatch"

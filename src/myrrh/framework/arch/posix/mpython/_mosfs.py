@@ -4,7 +4,7 @@ import stat
 
 from myrrh.framework.mpython import mbuiltins
 
-from myrrh.core.services.system import (
+from myrrh.core.objects.system import (
     ExecutionFailureCauseRVal,
     MOsError,
     AbcRuntimeDelegate,

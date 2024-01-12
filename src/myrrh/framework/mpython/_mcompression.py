@@ -1,5 +1,5 @@
 from myrrh.core.interfaces import abstractmethod, ABC
-from myrrh.core.services.system import AbcRuntimeDelegate
+from myrrh.core.objects.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 

@@ -7,7 +7,7 @@ import calendar
 
 from myrrh.utils.mstring import str2int
 
-from myrrh.core.services.system import (
+from myrrh.core.objects.system import (
     ExecutionFailureCauseRVal,
     ExecutionFailureCauseErr,
     _mlib_,

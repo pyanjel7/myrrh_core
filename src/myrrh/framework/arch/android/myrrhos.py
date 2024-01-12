@@ -1,7 +1,7 @@
 import re
 import posixpath
 
-from myrrh.core.services.system import AbcMyrrhOs, ExecutionFailureCauseRVal
+from myrrh.core.objects.system import AbcMyrrhOs, ExecutionFailureCauseRVal
 from myrrh.utils import mshlex
 from myrrh.utils import merrno as errno
 
