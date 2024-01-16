@@ -2,6 +2,7 @@ import abc
 import threading
 import typing
 import pydantic
+import pydantic.types
 import datetime
 
 from ...provider import (
