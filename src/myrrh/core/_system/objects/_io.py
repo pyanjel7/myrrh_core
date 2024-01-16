@@ -6,7 +6,7 @@ import typing
 from ....utils.delegation import ABCDelegation
 
 from ...interfaces import (
-    ICoreStreamService,
+    ICoreStreamEService,
     IFileInOutStream,
     IFileInStream,
     IFileOutStream,
@@ -39,9 +39,9 @@ __all__ = (
 
 class FileStream(RuntimeObject, IFileInOutStream):
     _eot = False
-    service: ICoreStreamService
+    service: ICoreStreamEService
 
-    def __init__(self, handle: int, path: bytes, name: bytes, service: ICoreStreamService):
+    def __init__(self, handle: int, path: bytes, name: bytes, service: ICoreStreamEService):
         super().__init__(handle, path, name, service)
 
     @property

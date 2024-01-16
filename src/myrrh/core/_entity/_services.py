@@ -1,14 +1,14 @@
 from ...utils.delegation import ABCDelegation
-from ..interfaces import ICoreFileSystemService, ICoreStreamService, ICoreShellService
+from ..interfaces import ICoreFileSystemEService, ICoreStreamEService, ICoreShellEService
 
-__all__ = ["ShellService", "FileSystemService", "StreamService"]
+__all__ = ["ShellEService", "FileSystemEService", "StreamEService"]
 
 
-class FileSystemService(ICoreFileSystemService, ABCDelegation):
-    __delegated__ = (ICoreFileSystemService,)
+class FileSystemEService(ICoreFileSystemEService, ABCDelegation):
+    __delegated__ = (ICoreFileSystemEService,)
 
     def __init__(self, ifs):
-        self.__delegate__(ICoreFileSystemService, ifs)
+        self.__delegate__(ICoreFileSystemEService, ifs)
 
     def list(self, path: bytes, *, extras: dict | None = None) -> list[bytes]:
         assert isinstance(path, bytes), f"path argument must be of type bytes not {path.__class__.__name__}"
@@ -101,11 +101,11 @@ def _assert_cmd_list(cmd):
     return True, "ok"
 
 
-class ShellService(ICoreShellService, ABCDelegation):
-    __delegated__ = (ICoreShellService,)
+class ShellEService(ICoreShellEService, ABCDelegation):
+    __delegated__ = (ICoreShellEService,)
 
     def __init__(self, ishell):
-        self.__delegate__(ICoreShellService, ishell)
+        self.__delegate__(ICoreShellEService, ishell)
 
     def execute(
         self,
@@ -136,11 +136,11 @@ class ShellService(ICoreShellService, ABCDelegation):
         return self._delegate_.spawn(command, working_dir, env)
 
 
-class StreamService(ICoreStreamService, ABCDelegation):
-    __delegated__ = (ICoreStreamService,)
+class StreamEService(ICoreStreamEService, ABCDelegation):
+    __delegated__ = (ICoreStreamEService,)
 
     def __init__(self, istream):
-        self.__delegate__(ICoreStreamService, istream)
+        self.__delegate__(ICoreStreamEService, istream)
 
     def open_file(self, path: bytes, wiring: int, *, extras: dict | None = None) -> tuple[bytes, int]:
         assert isinstance(path, bytes), f"path argument must be of type bytes not {path.__class__.__name__}"

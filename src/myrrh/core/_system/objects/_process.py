@@ -1,4 +1,4 @@
-from ...interfaces import IProcess, Stat, ICoreStreamService
+from ...interfaces import IProcess, Stat, ICoreStreamEService
 from ...services.config import cfg_init
 from ....provider import StatField
 
@@ -11,14 +11,14 @@ __all__ = ("Process",)
 
 class Process(RuntimeObject, IProcess):
     pid = 0
-    service: ICoreStreamService
+    service: ICoreStreamEService
 
     def __init__(
         self,
         handle: int,
         path: bytes,
         name: bytes,
-        service: ICoreStreamService,
+        service: ICoreStreamEService,
         hin: int | None,
         hout: int | None,
         herr: int | None,

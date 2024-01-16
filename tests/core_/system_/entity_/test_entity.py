@@ -1,6 +1,6 @@
 import unittest
 
-from myrrh.provider import IProvider, IShellService, IFileSystemService
+from myrrh.provider import IProvider, IShellEService, IFileSystemEService
 from myrrh.provider.registry import ProviderRegistry
 
 from myrrh.core.objects.entity import CoreProvider
@@ -18,10 +18,10 @@ class CoreProviderTest(unittest.TestCase):
 
     def test_basic_set_default(self):
         class FakeProvider(IProvider):
-            class FakeShellServ(IShellService):
+            class FakeShellServ(IShellEService):
                 protocol = "fake"
 
-            class FakeFilesystemServ(IFileSystemService):
+            class FakeFilesystemServ(IFileSystemEService):
                 protocol = "fake"
 
             def services(self):

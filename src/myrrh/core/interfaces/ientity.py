@@ -5,31 +5,31 @@ import pydantic
 import datetime
 
 from ...provider import (
-    IShellService,
-    IFileSystemService,
-    IStreamService,
-    IStateService,
-    ISnapService,
-    IInstanceService,
+    IShellEService,
+    IFileSystemEService,
+    IStreamEService,
+    IStateEService,
+    ISnapEService,
+    IInstanceEService,
     Protocol,
-    IEntityService,
+    IEService,
 )
 
 __all__ = [
-    "IEntityServiceGroup",
+    "IEServiceGroup",
     "IRegistry",
-    "IEntityServiceGroup",
+    "IEServiceGroup",
     "ISystem",
     "IHost",
     "IVendor",
     "IEntity",
-    "ICoreService",
-    "ICoreStreamService",
-    "ICoreShellService",
-    "ICoreFileSystemService",
-    "ICoreStateService",
-    "ICoreSnapService",
-    "ICoreInstanceService",
+    "ICoreEService",
+    "ICoreStreamEService",
+    "ICoreShellEService",
+    "ICoreFileSystemEService",
+    "ICoreStateEService",
+    "ICoreSnapEService",
+    "ICoreInstanceEService",
     "Protocol",
 ]
 
@@ -64,35 +64,35 @@ class IBaseItem(abc.ABC):
         ...
 
 
-class ICoreService(IEntityService):
+class ICoreEService(IEService):
     @classmethod
     @abc.abstractmethod
     def eref(cls) -> str:
         ...
 
 
-class ICoreStreamService(IStreamService, ICoreService):
-    __delegate_all__ = (IStreamService, ICoreService)
+class ICoreStreamEService(IStreamEService, ICoreEService):
+    __delegate_all__ = (IStreamEService, ICoreEService)
 
 
-class ICoreFileSystemService(IFileSystemService, ICoreService):
-    __delegate_all__ = (IFileSystemService, ICoreService)
+class ICoreFileSystemEService(IFileSystemEService, ICoreEService):
+    __delegate_all__ = (IFileSystemEService, ICoreEService)
 
 
-class ICoreShellService(IShellService, ICoreService):
-    __delegate_all__ = (IShellService, ICoreService)
+class ICoreShellEService(IShellEService, ICoreEService):
+    __delegate_all__ = (IShellEService, ICoreEService)
 
 
-class ICoreStateService(IStateService, ICoreService):
-    __delegate_all__ = (IStateService, ICoreService)
+class ICoreStateEService(IStateEService, ICoreEService):
+    __delegate_all__ = (IStateEService, ICoreEService)
 
 
-class ICoreSnapService(ISnapService, ICoreService):
-    __delegate_all__ = (ISnapService, ICoreService)
+class ICoreSnapEService(ISnapEService, ICoreEService):
+    __delegate_all__ = (ISnapEService, ICoreEService)
 
 
-class ICoreInstanceService(IInstanceService, ICoreService):
-    __delegate_all__ = (IInstanceService, ICoreService)
+class ICoreInstanceEService(IInstanceEService, ICoreEService):
+    __delegate_all__ = (IInstanceEService, ICoreEService)
 
 
 class IRegistry(dict, abc.ABC):
@@ -113,10 +113,10 @@ class IRegistry(dict, abc.ABC):
         ...
 
 
-class IEntityServiceGroup(abc.ABC):
+class IEServiceGroup(abc.ABC):
     @property
     @abc.abstractmethod
-    def services(self) -> dict[str, typing.Type[ICoreService]]:
+    def services(self) -> dict[str, typing.Type[ICoreEService]]:
         ...
 
     @property
@@ -130,53 +130,53 @@ class IEntityServiceGroup(abc.ABC):
         ...
 
 
-class ISystem(IEntityServiceGroup):
+class ISystem(IEServiceGroup):
     @property
     @abc.abstractmethod
-    def shell(self) -> ICoreShellService:
-        ...
-
-    @property
-    @abc.abstractmethod
-    def fs(self) -> ICoreFileSystemService:
+    def shell(self) -> ICoreShellEService:
         ...
 
     @property
     @abc.abstractmethod
-    def stream(self) -> ICoreStreamService:
-        ...
-
-    @abc.abstractmethod
-    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamService:
-        ...
-
-    @abc.abstractmethod
-    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemService:
-        ...
-
-    @abc.abstractmethod
-    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellService:
-        ...
-
-
-class IHost(IEntityServiceGroup):
-    @property
-    @abc.abstractmethod
-    def state(self) -> ICoreStateService:
+    def fs(self) -> ICoreFileSystemEService:
         ...
 
     @property
     @abc.abstractmethod
-    def snap(self) -> ICoreSnapService:
+    def stream(self) -> ICoreStreamEService:
+        ...
+
+    @abc.abstractmethod
+    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamEService:
+        ...
+
+    @abc.abstractmethod
+    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemEService:
+        ...
+
+    @abc.abstractmethod
+    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellEService:
+        ...
+
+
+class IHost(IEServiceGroup):
+    @property
+    @abc.abstractmethod
+    def state(self) -> ICoreStateEService:
         ...
 
     @property
     @abc.abstractmethod
-    def inst(self) -> ICoreInstanceService:
+    def snap(self) -> ICoreSnapEService:
+        ...
+
+    @property
+    @abc.abstractmethod
+    def inst(self) -> ICoreInstanceEService:
         ...
 
 
-class IVendor(IEntityServiceGroup):
+class IVendor(IEServiceGroup):
     ...
 
 

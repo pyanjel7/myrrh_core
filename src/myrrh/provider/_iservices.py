@@ -3,15 +3,15 @@ import enum
 import typing
 
 __all__ = (
-    "IShellService",
-    "IFileSystemService",
-    "IStreamService",
-    "IStateService",
-    "ISnapService",
-    "IInstanceService",
-    "ServiceGroup",
+    "IShellEService",
+    "IFileSystemEService",
+    "IStreamEService",
+    "IStateEService",
+    "ISnapEService",
+    "IInstanceEService",
+    "EServiceGroup",
     "Protocol",
-    "IEntityService",
+    "IEService",
     "Stat",
     "Wiring",
     "Whence",
@@ -78,7 +78,7 @@ class Protocol(enum.Enum):
         return self._value_
 
 
-class IEntityService(abc.ABC):
+class IEService(abc.ABC):
     category: str
     name: str
     protocol: Protocol | str
@@ -87,10 +87,10 @@ class IEntityService(abc.ABC):
 T = typing.TypeVar("T")
 
 
-class ServiceGroup(enum.Enum):
-    vendor = abc.ABCMeta("IEntityServiceVendor", (IEntityService,), dict())
-    system = abc.ABCMeta("IEntityServiceSystem", (IEntityService,), dict())
-    host = abc.ABCMeta("IEntityServiceHost", (IEntityService,), dict())
+class EServiceGroup(enum.Enum):
+    vendor = abc.ABCMeta("IEServiceVendor", (IEService,), dict())
+    system = abc.ABCMeta("IEServiceSystem", (IEService,), dict())
+    host = abc.ABCMeta("IEServiceHost", (IEService,), dict())
 
     def __init__(self, cls):
         cls.category = self.name
@@ -118,7 +118,7 @@ class ServiceGroup(enum.Enum):
 
     @staticmethod
     def group(
-        category: "ServiceGroup" | typing.Iterable["ServiceGroup"] | str | None,
+        category: "EServiceGroup" | typing.Iterable["EServiceGroup"] | str | None,
         services: list[T],
     ) -> list[T]:
         if category is None:
@@ -129,7 +129,7 @@ class ServiceGroup(enum.Enum):
         else:
             if isinstance(category, str):
                 categories = (category,)
-            elif isinstance(category, ServiceGroup):
+            elif isinstance(category, EServiceGroup):
                 categories = (category.name,)
             else:
                 categories = tuple((c if isinstance(c, str) else c.name) for c in category)  # type: ignore[assignment]
@@ -141,8 +141,8 @@ class ServiceGroup(enum.Enum):
         return list(filter(filter_, services))
 
 
-@ServiceGroup.host("state")
-class IStateService(abc.ABC):
+@EServiceGroup.host("state")
+class IStateEService(abc.ABC):
     class states(enum.Enum):
         suspended = 0
         stopped = 1
@@ -177,8 +177,8 @@ class IStateService(abc.ABC):
         ...
 
 
-@ServiceGroup.host("snap")
-class ISnapService(abc.ABC):
+@EServiceGroup.host("snap")
+class ISnapEService(abc.ABC):
     import posixpath
 
     sep = posixpath.sep
@@ -212,8 +212,8 @@ class ISnapService(abc.ABC):
         ...
 
 
-@ServiceGroup.host("instance")
-class IInstanceService:
+@EServiceGroup.host("instance")
+class IInstanceEService:
     @abc.abstractmethod
     def delete(self, warehouse, *, extras: dict | None = None):
         ...
@@ -223,8 +223,8 @@ class IInstanceService:
         ...
 
 
-@ServiceGroup.system("shell")
-class IShellService(abc.ABC):
+@EServiceGroup.system("shell")
+class IShellEService(abc.ABC):
     @abc.abstractmethod
     def execute(self, command: bytes, working_dir: bytes | None = None, env: dict | None = None, *, extras: dict | None = None) -> tuple[bytes, bytes, bytes]:
         ...
@@ -238,8 +238,8 @@ class IShellService(abc.ABC):
         ...
 
 
-@ServiceGroup.system("fs")
-class IFileSystemService(abc.ABC):
+@EServiceGroup.system("fs")
+class IFileSystemEService(abc.ABC):
     @abc.abstractmethod
     def rm(self, path: bytes, *, extras: dict | None = None) -> None:
         ...
@@ -269,8 +269,8 @@ class IFileSystemService(abc.ABC):
         ...
 
 
-@ServiceGroup.system("stream")
-class IStreamService(abc.ABC):
+@EServiceGroup.system("stream")
+class IStreamEService(abc.ABC):
     @abc.abstractmethod
     def open_file(self, path: bytes, wiring: int, *, extras: dict | None = None) -> tuple[bytes, int]:
         ...

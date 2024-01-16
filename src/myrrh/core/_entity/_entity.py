@@ -8,29 +8,29 @@ from mplugins.provider.local import provider
 from ...utils.delegation import NoneDelegation, ABCDelegation, ABCDelegationMeta
 
 from ..interfaces import (
-    ICoreService,
+    ICoreEService,
     ISystem,
     IRegistry,
-    ICoreSnapService,
-    ICoreInstanceService,
-    ICoreStateService,
-    ICoreShellService,
-    ICoreFileSystemService,
-    ICoreStreamService,
+    ICoreSnapEService,
+    ICoreInstanceEService,
+    ICoreStateEService,
+    ICoreShellEService,
+    ICoreFileSystemEService,
+    ICoreStreamEService,
 )
 from ..services.config import cfg_init
 
 from ...warehouse.item import NoneItem
 from ...warehouse.registry import ItemRegistry
-from ...provider import ServiceGroup, IProvider, Protocol, service_fullname
+from ...provider import EServiceGroup, IProvider, Protocol, service_fullname
 
 
-from ._services import FileSystemService, ShellService, StreamService
+from ._services import FileSystemEService, ShellEService, StreamEService
 from ._registry import Registry
 
 __all__ = [
     "Entity",
-    "CoreServiceClass",
+    "CoreEServiceClass",
     "CoreProviderClass",
     "CoreProvider",
     "NoneShell",
@@ -43,28 +43,28 @@ __all__ = [
 
 _VALIDATE = cfg_init("validate_service_args", True, section="myrrh.core")
 
-NoneShell = NoneDelegation("NoneShellType", ICoreShellService)
-NoneFs = NoneDelegation("NoneFsType", ICoreFileSystemService)
-NoneStream = NoneDelegation("NoneFsType", ICoreStreamService)
-NoneState = NoneDelegation("NoneStateType", ICoreStateService)
-NoneSnap = NoneDelegation("NoneSnapType", ICoreSnapService)
-NoneInstance = NoneDelegation("NoneInstance", ICoreInstanceService)
+NoneShell = NoneDelegation("NoneShellType", ICoreShellEService)
+NoneFs = NoneDelegation("NoneFsType", ICoreFileSystemEService)
+NoneStream = NoneDelegation("NoneFsType", ICoreStreamEService)
+NoneState = NoneDelegation("NoneStateType", ICoreStateEService)
+NoneSnap = NoneDelegation("NoneSnapType", ICoreSnapEService)
+NoneInstance = NoneDelegation("NoneInstance", ICoreInstanceEService)
 
 
-class _ServiceGroup:
+class _EServiceGroup:
     __slots__ = ("cfg", "lock", "services", "protocols")
 
     cfg: IRegistry
     lock: threading.RLock
-    services: dict[str, typing.Type[ICoreService]]
+    services: dict[str, typing.Type[ICoreEService]]
 
     def __init__(
         self,
-        category: ServiceGroup,
+        category: EServiceGroup,
         cfg,
-        services: list[typing.Type[ICoreService]] = list(),
+        services: list[typing.Type[ICoreEService]] = list(),
     ):
-        self.services = {s.eref(): s for s in ServiceGroup.group(category, services)}
+        self.services = {s.eref(): s for s in EServiceGroup.group(category, services)}
 
         self.cfg = cfg
         self.lock = threading.RLock()
@@ -81,13 +81,13 @@ class _ServiceGroup:
             self.protocols.add(str(serv.protocol))
 
 
-class System(_ServiceGroup, ISystem):
-    shell: ShellService = NoneShell
-    fs: FileSystemService = NoneFs
-    stream: StreamService = NoneStream
+class System(_EServiceGroup, ISystem):
+    shell: ShellEService = NoneShell
+    fs: FileSystemEService = NoneFs
+    stream: StreamEService = NoneStream
 
     def __init__(self, cfg, services=list()):
-        super().__init__(ServiceGroup.system, cfg, services)
+        super().__init__(EServiceGroup.system, cfg, services)
 
         proto = getattr(self, Protocol.MYRRH.value, None)
 
@@ -97,14 +97,14 @@ class System(_ServiceGroup, ISystem):
             self.stream = getattr(proto, "stream", NoneStream)
 
         if _VALIDATE:
-            self.shell = ShellService(self.shell)
-            self.fs = FileSystemService(self.fs)
-            self.stream = StreamService(self.stream)
+            self.shell = ShellEService(self.shell)
+            self.fs = FileSystemEService(self.fs)
+            self.stream = StreamEService(self.stream)
 
     def __str__(self):
         return f'{self.cfg.eid}(System: {",".join(self.protocols)}'
 
-    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamService:
+    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamEService:
         if not protocol:
             return self.stream
 
@@ -116,7 +116,7 @@ class System(_ServiceGroup, ISystem):
 
         raise RuntimeError(f'Unsupported stream protocol "{protocol_name}" for {str(self)}')
 
-    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemService:
+    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemEService:
         if not protocol:
             return self.fs
 
@@ -128,7 +128,7 @@ class System(_ServiceGroup, ISystem):
 
         raise RuntimeError(f'Unsupported file system protocol "{protocol_name}" for {str(self)}')
 
-    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellService:
+    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellEService:
         if not protocol:
             return self.shell
 
@@ -142,13 +142,13 @@ class System(_ServiceGroup, ISystem):
         raise RuntimeError(f'Unsupported shell protocol "{protocol_name}" for {str(self)}')
 
 
-class Host(_ServiceGroup):
-    state: ICoreStateService = NoneState
-    snap: ICoreSnapService = NoneSnap
-    inst: ICoreInstanceService = NoneInstance
+class Host(_EServiceGroup):
+    state: ICoreStateEService = NoneState
+    snap: ICoreSnapEService = NoneSnap
+    inst: ICoreInstanceEService = NoneInstance
 
     def __init__(self, cfg, services=list()):
-        super().__init__(ServiceGroup.host, cfg, services)
+        super().__init__(EServiceGroup.host, cfg, services)
 
         proto = getattr(self, Protocol.MYRRH.value, None)
         if proto:
@@ -157,9 +157,9 @@ class Host(_ServiceGroup):
             self.inst = getattr(proto, "inst", NoneInstance)
 
 
-class Vendor(_ServiceGroup):
+class Vendor(_EServiceGroup):
     def __init__(self, cfg, services=list()):
-        super().__init__(ServiceGroup.vendor, cfg, services)
+        super().__init__(EServiceGroup.vendor, cfg, services)
 
 
 def CoreProviderClass(provider_cls, name) -> typing.Type[IProvider]:
@@ -174,10 +174,10 @@ def CoreProviderClass(provider_cls, name) -> typing.Type[IProvider]:
     return ABCDelegationMeta(_._provider_.__name__, _.__bases__, dict(_.__dict__))  # type: ignore[return-value]
 
 
-def CoreServiceClass(path, serv_cls, pname):
-    ServInterface = ServiceGroup[serv_cls.category].__interfaces__[serv_cls.name]
+def CoreEServiceClass(path, serv_cls, pname):
+    ServInterface = EServiceGroup[serv_cls.category].__interfaces__[serv_cls.name]
 
-    class _(ICoreService, ServInterface, ABCDelegation):
+    class _(ICoreEService, ServInterface, ABCDelegation):
         _serv_ = serv_cls
 
         _eref = "/".join((path, pname))
@@ -209,7 +209,7 @@ class CoreProvider(IProvider):
     ):
         self.providers = list(providers)
 
-        self._services: dict[str, typing.Type[ICoreService]] = dict()
+        self._services: dict[str, typing.Type[ICoreEService]] = dict()
         self._catalog: dict[str, IProvider] = dict()
         self.paths = ""
 
@@ -220,11 +220,11 @@ class CoreProvider(IProvider):
 
         for p in providers:
             serv = map(
-                lambda s: CoreServiceClass(f"{self.SERV}/{service_fullname(s)}", s, p._name_),
+                lambda s: CoreEServiceClass(f"{self.SERV}/{service_fullname(s)}", s, p._name_),
                 p.services(),
             )
 
-            for serv in ServiceGroup.group(None, list(serv)):
+            for serv in EServiceGroup.group(None, list(serv)):
                 _allpaths[serv.eref()] = serv
 
             for item in p.catalog():
@@ -267,7 +267,7 @@ class CoreProvider(IProvider):
         for path in paths:
             _paths_todict(path, self.paths, _allpaths[path])
 
-    def services(self) -> tuple[typing.Type[ICoreService]]:
+    def services(self) -> tuple[typing.Type[ICoreEService]]:
         return tuple(self._services.values())  # type: ignore[return-value]
 
     def catalog(self) -> tuple[str]:

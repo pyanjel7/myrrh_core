@@ -5,7 +5,7 @@
 
 This module provides advanced shell operations such as polling and predefined runner.
 
-.. seealso:: :class:`myrrh.core.service.IShellService`
+.. seealso:: :class:`myrrh.core.service.IShellEService`
 """
 import statistics
 import threading

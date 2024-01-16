@@ -1,4 +1,4 @@
-from ...interfaces import IRuntimeObject, ICoreService
+from ...interfaces import IRuntimeObject, ICoreEService
 
 __all__ = ("RuntimeObjectProxy", "RuntimeObject")
 
@@ -13,7 +13,7 @@ class RuntimeObject(IRuntimeObject):
 
     closed = False
 
-    def __init__(self, handle: int, path: bytes, name: bytes, service: ICoreService | None):
+    def __init__(self, handle: int, path: bytes, name: bytes, service: ICoreEService | None):
         self.ehandle: int = handle
         self.service = service
         self.epath = path

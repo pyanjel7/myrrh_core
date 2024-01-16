@@ -11,10 +11,10 @@ from ....provider import Protocol
 from ...interfaces import (
     IMyrrhOs,
     ISystem,
-    ICoreService,
-    ICoreShellService,
-    ICoreFileSystemService,
-    ICoreStreamService,
+    ICoreEService,
+    ICoreShellEService,
+    ICoreFileSystemEService,
+    ICoreStreamEService,
 )
 
 from ..objects import MyrrhEnviron
@@ -137,24 +137,24 @@ class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
         self.__delegate__(ISystem, system)
 
     @functools.cached_property
-    def shell(self) -> ICoreShellService:
+    def shell(self) -> ICoreShellEService:
         return _RuntimeShell(self._delegate_.shell, self)  # type: ignore[attr-defined]
 
     @functools.cached_property
-    def fs(self) -> ICoreFileSystemService:
+    def fs(self) -> ICoreFileSystemEService:
         return _RuntimeFs(self._delegate_.fs, self)  # type: ignore[attr-defined]
 
     @functools.cached_property
-    def stream(self) -> ICoreStreamService:
+    def stream(self) -> ICoreStreamEService:
         return _RuntimeStream(self._delegate_.stream, self)  # type: ignore[attr-defined]
 
-    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamService:
+    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamEService:
         return _RuntimeStream(self._delegate_.Stream(protocol), self)
 
-    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemService:
+    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemEService:
         return _RuntimeFs(self._delegate_.Fs(protocol), self)
 
-    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellService:
+    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellEService:
         return _RuntimeShell(self._delegate_.Shell(protocol), self)
 
     def syspathb(self, path):
@@ -359,11 +359,11 @@ class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
         raise TypeError("path should be string, bytes or os.PathLike, not {}".format(path.__class__.__name__))
 
 
-class _RuntimeShell(ICoreShellService, ICoreService, ABCDelegation):
-    __delegated__ = (ICoreShellService, ICoreService)
+class _RuntimeShell(ICoreShellEService, ICoreEService, ABCDelegation):
+    __delegated__ = (ICoreShellEService, ICoreEService)
 
     def __init__(self, shell, runtime: AbcMyrrhOs):
-        self.__delegate__(ICoreShellService, shell)
+        self.__delegate__(ICoreShellEService, shell)
 
         self._runtime = runtime
 
@@ -402,11 +402,11 @@ class _RuntimeShell(ICoreShellService, ICoreService, ABCDelegation):
         return self._delegate_.spawn(command, working_dir, env, extras=extras)
 
 
-class _RuntimeFs(ICoreFileSystemService, ICoreService, ABCDelegation):
-    __delegated__ = (ICoreFileSystemService, ICoreService)
+class _RuntimeFs(ICoreFileSystemEService, ICoreEService, ABCDelegation):
+    __delegated__ = (ICoreFileSystemEService, ICoreEService)
 
-    def __init__(self, fs: ICoreFileSystemService, runtime: AbcMyrrhOs):
-        self.__delegate__(ICoreFileSystemService, fs)
+    def __init__(self, fs: ICoreFileSystemEService, runtime: AbcMyrrhOs):
+        self.__delegate__(ICoreFileSystemEService, fs)
 
         self._runtime: AbcMyrrhOs = runtime
 
@@ -432,11 +432,11 @@ class _RuntimeFs(ICoreFileSystemService, ICoreService, ABCDelegation):
         return self._delegate_.stat(self._runtime.getpathb(path), extras=extras)
 
 
-class _RuntimeStream(ICoreStreamService, ABCDelegation):
-    __delegated__ = (ICoreStreamService, ICoreService)
+class _RuntimeStream(ICoreStreamEService, ABCDelegation):
+    __delegated__ = (ICoreStreamEService, ICoreEService)
 
-    def __init__(self, stream: ICoreStreamService, runtime: IMyrrhOs):
-        self.__delegate__(ICoreStreamService, stream)
+    def __init__(self, stream: ICoreStreamEService, runtime: IMyrrhOs):
+        self.__delegate__(ICoreStreamEService, stream)
         self._runtime = runtime
 
     def open_file(self, path: bytes, wiring: int, *, extras: dict | None = None) -> tuple[bytes, int]:

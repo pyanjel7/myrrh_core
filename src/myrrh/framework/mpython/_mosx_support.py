@@ -116,7 +116,7 @@ class Abc_Osx_support(AbcRuntime):
         if self._SYSTEM_VERSION is None:
             self._SYSTEM_VERSION = ""
             try:
-                f = open("/System/Library/CoreServices/SystemVersion.plist")
+                f = open("/System/Library/CoreEServices/SystemVersion.plist")
             except OSError:
                 # We're on a plain darwin box, fall back to the default
                 # behaviour.

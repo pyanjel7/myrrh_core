@@ -3,9 +3,9 @@ import typing
 
 from .ientity import (
     ISystem,
-    ICoreShellService,
-    ICoreFileSystemService,
-    ICoreStreamService,
+    ICoreShellEService,
+    ICoreFileSystemEService,
+    ICoreStreamEService,
 )
 from ...provider import Stat, Protocol
 
@@ -330,15 +330,15 @@ class IMyrrhOs(ISystem, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamService:
+    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamEService:
         ...
 
     @abc.abstractmethod
-    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemService:
+    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemEService:
         ...
 
     @abc.abstractmethod
-    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellService:
+    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellEService:
         ...
 
 

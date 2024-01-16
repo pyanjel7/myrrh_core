@@ -12,9 +12,9 @@ from myrrh.provider import (
     Protocol,
     Whence,
     Stat,
-    IShellService,
-    IFileSystemService,
-    IStreamService,
+    IShellEService,
+    IFileSystemEService,
+    IStreamEService,
     StatField,
 )
 
@@ -45,7 +45,7 @@ _default_shell_encoding = "utf8"
 OSErrorEBADF = OSError(errno.EBADF, os.strerror(errno.EBADF))
 
 
-class Shell(IShellService):
+class Shell(IShellEService):
     protocol = Protocol.MYRRH
 
     def execute(
@@ -101,9 +101,9 @@ class Shell(IShellService):
         os.kill(proc_id, sig)
 
 
-class FileSystem(IFileSystemService):
+class FileSystem(IFileSystemEService):
     """
-    Service handle all file system function
+    EService handle all file system function
     """
 
     protocol = Protocol.MYRRH
@@ -151,7 +151,7 @@ except ImportError:
     winapi = False  # type: ignore[assignment]
 
 
-class StreamPosix(IStreamService):
+class StreamPosix(IStreamEService):
     protocol = Protocol.POSIX
     chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
@@ -381,7 +381,7 @@ class StreamPosix(IStreamService):
 
 if winapi:
 
-    class StreamWinAPi(IStreamService):
+    class StreamWinAPi(IStreamEService):
         protocol = Protocol.WINAPI
         chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
