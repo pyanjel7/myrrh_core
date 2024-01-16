@@ -9,7 +9,7 @@ __mlib__ = "AbcScriptHelper"
 
 
 class _interface(ABC):
-    import test.support.script_helper as local_script_helper
+    import test.support.script_helper as local_script_helper  # type: ignore[import-not-found]
 
     @abstractmethod
     def assert_python_ok(self, *args, **env_vars) -> typing.Any:

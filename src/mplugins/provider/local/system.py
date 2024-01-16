@@ -20,7 +20,7 @@ from myrrh.provider import (
 
 from myrrh.utils.mhandle import LightHandler
 
-from myrrh.core.services.config import cfg_init
+from myrrh.core.services.config import cfg_prop
 
 
 def _working_dir(cwd):
@@ -153,7 +153,7 @@ except ImportError:
 
 class StreamPosix(IStreamService):
     protocol = Protocol.POSIX
-    chunk_sz = cfg_init("rd_chunk_size", 2048, section="mplugins.provider.local")
+    chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
     handler = LightHandler()
 
@@ -383,7 +383,7 @@ if winapi:
 
     class StreamWinAPi(IStreamService):
         protocol = Protocol.WINAPI
-        chunk_sz = cfg_init("rd_chunk_size", 2048, section="mplugins.provider.local")
+        chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
         handles: dict[int, typing.Any] = dict()
 

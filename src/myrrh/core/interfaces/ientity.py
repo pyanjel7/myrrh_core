@@ -1,8 +1,9 @@
 import abc
 import threading
 import typing
+import pydantic
+import datetime
 
-from ...warehouse.item import BaseItem
 from ...provider import (
     IShellService,
     IFileSystemService,
@@ -11,13 +12,13 @@ from ...provider import (
     ISnapService,
     IInstanceService,
     Protocol,
-    IService,
+    IEntityService,
 )
 
 __all__ = [
-    "IServiceGroup",
+    "IEntityServiceGroup",
     "IRegistry",
-    "IServiceGroup",
+    "IEntityServiceGroup",
     "ISystem",
     "IHost",
     "IVendor",
@@ -33,7 +34,37 @@ __all__ = [
 ]
 
 
-class ICoreService(IService):
+class IBaseItem(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def DOM(self) -> pydantic.types.PastDatetime | None:
+        return None
+
+    @property
+    @abc.abstractmethod
+    def SLL(self) -> datetime.timedelta | None:
+        return None
+
+    @property
+    @abc.abstractmethod
+    def UBD(self) -> datetime.datetime | None:
+        return None
+
+    @property
+    @abc.abstractmethod
+    def UTC(self) -> bool | None:
+        return None
+
+    @abc.abstractmethod
+    def now(self):
+        ...
+
+    @abc.abstractmethod
+    def __bool__(self):
+        ...
+
+
+class ICoreService(IEntityService):
     @classmethod
     @abc.abstractmethod
     def eref(cls) -> str:
@@ -78,11 +109,11 @@ class IRegistry(dict, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def append(self, item: BaseItem, mode: typing.Literal["keep", "update", "replace"]):
+    def append(self, item: IBaseItem, mode: typing.Literal["keep", "update", "replace"]):
         ...
 
 
-class IServiceGroup(abc.ABC):
+class IEntityServiceGroup(abc.ABC):
     @property
     @abc.abstractmethod
     def services(self) -> dict[str, typing.Type[ICoreService]]:
@@ -99,7 +130,7 @@ class IServiceGroup(abc.ABC):
         ...
 
 
-class ISystem(IServiceGroup):
+class ISystem(IEntityServiceGroup):
     @property
     @abc.abstractmethod
     def shell(self) -> ICoreShellService:
@@ -128,7 +159,7 @@ class ISystem(IServiceGroup):
         ...
 
 
-class IHost(IServiceGroup):
+class IHost(IEntityServiceGroup):
     @property
     @abc.abstractmethod
     def state(self) -> ICoreStateService:
@@ -145,7 +176,7 @@ class IHost(IServiceGroup):
         ...
 
 
-class IVendor(IServiceGroup):
+class IVendor(IEntityServiceGroup):
     ...
 
 

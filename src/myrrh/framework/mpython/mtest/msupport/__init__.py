@@ -9,7 +9,7 @@ __mlib__ = "AbcSupport"
 
 
 class _interface(ABC):
-    import test.support as local_support
+    import test.support as local_support  # type: ignore[import-not-found]
 
     catch_unraisable_exception = local_support.catch_unraisable_exception
 

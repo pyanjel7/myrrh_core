@@ -5,8 +5,10 @@ import errno
 import tempfile
 import threading
 
+from myrrh import PID
+
 from myrrh.utils.delegation import abstractmethod
-from myrrh.core.services.config import PID, cfg_init
+from myrrh.core.services.config import cfg_prop
 from myrrh.core.objects.system import AbcRuntime, FileException, _mlib_
 from ..mpython import _mosfs
 
@@ -85,8 +87,8 @@ class AdvFsFileGet(AdvFsFile):
 class AbcAdvFs(AbcRuntime):
     __frameworkpath__ = "mfs.advfs"
 
-    CHUNK_SZ = cfg_init("advfs_file_chunk_size", 1024 * 500, section="myrrh.framework.mfs")
-    COPY_BUFSIZE = cfg_init("advfs_copy_buffer_size", 1024 * 64, section="myrrh.framework.mfs")
+    CHUNK_SZ = cfg_prop("advfs_file_chunk_size", 1024 * 500, section="myrrh.framework.mfs")
+    COPY_BUFSIZE = cfg_prop("advfs_copy_buffer_size", 1024 * 64, section="myrrh.framework.mfs")
 
     @property
     def os(self):

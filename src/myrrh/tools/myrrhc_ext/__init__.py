@@ -1,10 +1,11 @@
 import importlib
 import typing
 
-from myrrh.core.services.config import load_ext_group
-from ..myrrhc import cmd, types  # noqa: F401
-from ..myrrhc.cmd import myrrhc_cmds  # noqa: F401
+from myrrh.core.services.plugins import load_ext_group
+from ..myrrhc import cmd, types
+from ..myrrhc.cmd import myrrhc_cmds
 
+__all__ = ["getsession", "load_commands", "cmd", "types", "myrrhc_cmds"]
 
 _extensions: dict[str, typing.Any] = dict()
 

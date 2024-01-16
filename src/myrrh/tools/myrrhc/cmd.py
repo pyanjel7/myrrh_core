@@ -11,18 +11,13 @@ from click.core import MultiCommand
 
 import bmy
 
+from myrrh import PID, __version__, __license__, __copyright__
+
 from .exceptions import Abort, Exit, Failure, Reboot
 from . import completion
 
-from myrrh.core.services.config import (
-    cfg_get,
-    cfg_init,
-    __version__,
-    __license__,
-    __copyright__,
-    PID,
-)
-from myrrh.core.services.logging import log
+from myrrh.core.services.config import cfg_get, cfg_init
+from myrrh.core.services.loggings import log
 from myrrh.core.objects.groups import myrrh_group_keys
 
 from prompt_toolkit.shortcuts import print_container
@@ -76,7 +71,7 @@ class EidOuput:
                     width=max_line_len,
                 )
 
-                lines = lines[rows - 1:]
+                lines = lines[rows - 1 :]
 
                 bodies[e].append(header and [header, body] or [body])
                 header = None
@@ -186,7 +181,7 @@ def print_table(message, cols, *args, **kwargs):
         expand_sz = sz + 4
 
         if len(s) >= txt_sz:
-            s = s[0] + s[1: txt_sz - 4] + "..." + s[-1]
+            s = s[0] + s[1 : txt_sz - 4] + "..." + s[-1]
 
         line = "".join([line, ("%s\t" % s).expandtabs(expand_sz)])
 

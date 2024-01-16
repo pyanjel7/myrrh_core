@@ -50,7 +50,7 @@ class msvcrt:
 
 
 class _interface(ABC):
-    import _pyio as local_io
+    import _pyio as local_io  # type: ignore[import-not-found]
 
     @property
     @abstractmethod

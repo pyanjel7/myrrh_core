@@ -1,510 +1,325 @@
-import shutil
-import traceback
-import warnings
-import sys
 import os
-import re
-import logging
-
-import pkg_resources
-import logging.config
+import shutil
+import urllib.parse
+import sys
 import json
+import typing
+import warnings
+import pathlib
+import importlib.metadata
 
-from importlib import metadata
+from myrrh import __distname__, __license__, __version__, __copyright__, __file__ as _myrrh_file
 
-__all__ = [
-    "rebase",
-    "cfg_get",
-    "cfg_set",
-    "cfg_del",
-    "myrrh_sys",
-    "__distname__",
-    "__version__",
-    "__copyright__",
-    "__license__",
-]
+from ..interfaces import IConfigSrv, ConfigValueType
 
-myrrh_sys = "myrrh.msys"
-__distname__ = "myrrh"
-
-try:
-    from ...__license__ import copyright as __copyright__, license as __license__
-except Exception:
-    __copyright__ = ""
-    __license__ = ""
+from .registry import ServiceRegistry
 
 _JSON_INDENT = 2
 
-PID = os.getpid()
+MYRRHSYS_INIT_FILENAME = "myrrh_init.msys"
+
+__all__ = ["cfg_prop", "DefaultConfigSrv", "cfg_init", "cfg_get", "cfg_set", "cfg_del", "getsysconfig", "rebase"]
 
 
-def _load(f):
-    return json.load(f)
+class DefaultConfigSrv(IConfigSrv):
+    __single__: "DefaultConfigSrv" = None  # type: ignore[valid-type, assignment]
 
+    def __new__(cls, path: str | None, config: dict[str, typing.Any] | None = None):
+        if cls.__single__ is None:
+            cls.__single__ = super().__new__(cls)
 
-def _save(f, cfg):
-    json.dump(cfg, f, indent=_JSON_INDENT)
+        return cls.__single__
 
+    def __init__(self, path: str | None, config: dict[str, typing.Any] | None = None):
+        self.dconfig = config or dict()
+        self.path: pathlib.Path | None = None
+        self._uri: str | None = None
 
-def myrrh_default_cfg_dirs():
-    try:
-        from click import utils
-
-        cfg_dir = utils.get_app_dir(__distname__)
-    except ImportError:
-        cfg_dir = os.path.expanduser(os.path.join("~", "." + __distname__))
-
-    if not os.path.exists(cfg_dir):
-        try:
-            os.makedirs(cfg_dir)
-        except Exception:
-            pass  # ignore errors => no config dir
-
-    return [cfg_dir]
-
-
-def myrrh_versioning(file, dist_name):
-    try:
-        # try to find version from package dist
-        version = pkg_resources.get_distribution(dist_name).version
-    except Exception:
-        version = "0.0.0"
-
-    if version == "0.0.0":
-        # try to find version from scm
-        try:
-            from setuptools_scm import get_version
-
-            return get_version(relative_to=file)
-        except Exception:
-            pass
-
-    return version
-
-
-try:
-    from ...__version__ import version as __version__
-except Exception:
-    __version__ = myrrh_versioning(__file__, __distname__)
-
-
-def _msysfile(fpath):
-    msys = {}
-    with open(fpath) as f:
-        with open(fpath) as f:
-            msys = _load(f)
-
-    if not isinstance(msys, dict):
-        raise IOError(f"{fpath} incompatible configuration file type, dictionary required")
-
-    msys["@mbase@"] = os.path.abspath(fpath)
-
-    getattr(sys, "__msys__").update(msys)
-
-    return getattr(sys, "__msys__")
-
-
-def _msys(paths=None):
-    if not paths:
-        paths = myrrh_default_cfg_dirs()
-
-    for path in paths:
-        fpath = os.path.join(path, myrrh_sys) if (os.path.isdir(path)) else path
-        if os.path.isfile(fpath):
+        if path:
+            disk_path_str = urllib.parse.unquote(urllib.parse.urlparse(path).path) if path.startswith("file://") else path
+            disk_path = pathlib.Path(disk_path_str)
             try:
-                _msysfile(fpath)
+                with open(disk_path) as f:
+                    self.dconfig.update(json.load(f))
+                self.path = disk_path.absolute()
             except Exception as e:
-                warnings.warn(f'file "{fpath}" found but is invalid: {str(e)}, try to find another one')
-            else:
-                break
-    else:
-        try:
-            fpath = os.path.join(paths[0], myrrh_sys)
-            if not os.path.exists(fpath):
-                with open(fpath, "w") as f:
-                    _save(f, dict())
-
-                _msysfile(fpath)
-        except Exception:
-            fpath = None
-
-    if fpath:
-        global _log
-        _log = logging.getLogger("myrrh")
-        _log.info(f"system variables found at {fpath}")
-
-    return getattr(sys, "__msys__")
-
-
-def _rebase_internal(path=None):
-    __msys__ = getattr(sys, "__msys__", {})
-
-    path = path or __msys__.get("@mbase@")
-    installed_extensions = __msys__.get("@installed_extensions@") or list()
-    entities = __msys__.get("@entities@") or list()
-
-    setattr(
-        sys,
-        "__msys__",
-        {
-            "@mversion@": __version__,
-            "@mpath@": os.path.dirname(__file__),
-            "@copyright@": __copyright__,
-            "@license@": __license__,
-            "@etc@": myrrh_default_cfg_dirs(),
-            "@metadata@": dict(metadata.metadata("myrrh")),
-            "@loaded_extensions@": [],
-            "@failed_extensions@": [],
-            "@installed_extensions@": installed_extensions,
-            "@actived_ext_groups@": [],
-            "@entities@": entities,
-        },
-    )
-
-    cwd_file = os.path.join(os.getcwd(), myrrh_sys)
-
-    if path and os.path.isfile(path):
-        result = _msysfile(path)
-
-    elif path and os.path.isdir(path):
-        result = _msys([path])
-    elif os.path.isfile(cwd_file):
-        result = _msysfile(cwd_file)
-    else:
-        result = _msys()
-
-    return result
-
-
-_CONF_OBJ_TYPE = (
-    "loggers",
-    "handlers",
-    "formatters",
-    "filters",
-)
-
-
-def configure_log():
-    import configparser
-
-    logging_cfg = cfg_get(section="logging")
-
-    cfg = configparser.RawConfigParser()
-
-    for obj_type in _CONF_OBJ_TYPE:
-        cfg.add_section(obj_type)
-        cfg[obj_type]["keys"] = logging_cfg.get(obj_type) or ""
-        keys = filter(None, re.split(" *, *| +| *; *", cfg[obj_type]["keys"]))
-        for key in keys:
-            obj_name = obj_type.rstrip("s")
-            cfg.add_section(f"{obj_name}_{key}")
-            for k, v in cfg_get(section=f"logging.{obj_name}.{key}").items():
-                cfg[f"{obj_name}_{key}"][k] = v
-
-    logging.config.fileConfig(cfg, disable_existing_loggers=logging_cfg.get("disable_existing_loggers", True))
-
-    if not cfg_get("enable", True, section="logging"):
-        logging.disable()
-
-
-def rebase(path=None):
-    global _log
-
-    extension_bkup = sys.__msys__["@loaded_extensions@"] + sys.__msys__["@failed_extensions@"] if hasattr(sys, "__msys__") else None
-    extension_groups = sys.__msys__["@actived_ext_groups@"] if hasattr(sys, "__msys__") else None
-
-    result = _rebase_internal(path=None)
-
-    if cfg_get("rebase", False):
-        result = _rebase_internal(cfg_get("rebase"))
-
-    cfg_init("rebase", "")
-
-    cfg_init("raise_on_failure", False, section="extensions")
-    cfg_init("search_for", True, section="extensions")
-    cfg_init("default_value", True, section="extensions")
-
-    cfg_init("enable", False, section="logging")
-    cfg_init("version", 1, section="logging")
-    cfg_init("incremental", False, section="logging")
-    cfg_init("disable_existing_loggers", True, section="logging")
-    cfg_init("loggers", "root, myrrh", section="logging")
-    cfg_init("handlers", "console, myrrh", section="logging")
-    cfg_init("formatters", "myrrh", section="logging")
-    cfg_init("filters", "", section="logging")
-
-    cfg_init("level", "CRITICAL", section="logging.logger.root")
-    cfg_init("handlers", "console", section="logging.logger.root")
-
-    cfg_init("level", "INFO", section="logging.logger.myrrh")
-    cfg_init("handlers", "myrrh", section="logging.logger.myrrh")
-    cfg_init("qualname", "myrrh", section="logging.logger.myrrh")
-    cfg_init("propagate", "0", section="logging.logger.myrrh")
-
-    cfg_init("class", "StreamHandler", section="logging.handler.myrrh")
-    cfg_init("level", "DEBUG", section="logging.handler.myrrh")
-    cfg_init("formatter", "myrrh", section="logging.handler.myrrh")
-    cfg_init("args", "(sys.stdout,)", section="logging.handler.myrrh")
-
-    cfg_init("class", "StreamHandler", section="logging.handler.console")
-    cfg_init("level", "CRITICAL", section="logging.handler.myrrh")
-    cfg_init("args", "(sys.stdout,)", section="logging.handler.myrrh")
-
-    cfg_init(
-        "format",
-        "%(relativeCreated).1f - %(name)s:%(threadName)s - %(levelname)s - %(message)s",
-        section="logging.formatter.myrrh",
-    )
-
-    _log.info("myrrh new session")
-
-    find_ext()
-
-    if extension_groups:
-        for group in extension_groups:
-            load_ext_group(group)
-
-    if extension_bkup:
-        for extension in extension_bkup:
-            load_ext(extension)
-
-    return {k: v for k, v in result.items() if not (k.startswith("@") and k.endswith("@"))}
-
-
-def _cfg_get_section(d, section):
-    if not section:
-        return d
-
-    if not section.startswith(("__", "@__")):
-        section = "__" + section
-    if not section.endswith(("__", "__@")):
-        section = section + "__"
-
-    if not d.get(section):
-        d[section] = dict()
-
-    return d[section]
-
-
-def _persistent_setcfg(cfg_path, cfg):
-    try:
-        backup = f"{cfg_path}.bak"
-        if os.path.isfile(cfg_path):
-            shutil.copy(cfg_path, backup)
+                warnings.warn(f'file "{path}" found but is invalid: {str(e)}, config will not be saved')
         else:
-            with open(backup, "w") as f:
-                _save(f, cfg)
-    except Exception as e:
-        _log.warning(f"Failed to backup msys config in {cfg_path}: {str(e)}")
+            dirs = _msys_search_paths()
+            self.path, cfg = _search_local_cfg(dirs, MYRRHSYS_INIT_FILENAME)
 
-    try:
-        with open(cfg_path, "w") as f:
-            _save(f, cfg)
-    except Exception as e:
-        _log.info(f"Failed to save msys config in {cfg_path}: {str(e)}, config will not be persistante")
+            self.dconfig.update(cfg)
+
+        if self.path:
+            self._uri = self.path.as_uri()
+
+        if not isinstance(self.dconfig, dict):
+            raise IOError(f"{path} incompatible configuration file type, dictionary required")
+
+    def _persistent_setcfg(self):
+        if not self.path:
+            return
+
+        try:
+            backup = f"{self.path}.bak"
+            if os.path.isfile(self.path):
+                shutil.copy(self.path, backup)
+            else:
+                with open(backup, "w") as f:
+                    json.dump(self.dconfig, f, indent=_JSON_INDENT)
+        except Exception as e:
+            warnings.warn(f"Failed to backup msys config in {self.path}: {str(e)}")
+
+        try:
+            with open(self.path, "w") as f:
+                json.dump(self.dconfig, f, indent=_JSON_INDENT)
+
+        except Exception as e:
+            warnings.warn(f"Failed to save msys config in {self.path}: {str(e)}, config will not be persistante")
+
+    def _persistent_getcfg(self):
+        if not self.path:
+            return self.dconfig
+
+        try:
+            with open(self.path) as f:
+                fcfg = json.load(f)
+
+            return fcfg
+        except Exception as e:
+            warnings.warn(f"Failed to load msys config in{self.path}: {str(e)}, try restore backup")
+
+        try:
+            with open(f"{self.path}.bak") as f:
+                fcfg = json.load(f)
+
+            self._persistent_setcfg(fcfg)
+
+            return fcfg
+
+        except Exception as e:
+            warnings.warn(f"Failed to load backup msys config in{self.path}: {str(e)}, config is lost...")
+
+        return
+
+    def _get_section(self, section: str, create=False) -> dict[str, typing.Any]:
+        if not section:
+            return self.dconfig
+
+        if not section.startswith("__"):
+            section = "__" + section
+        if not section.endswith("__"):
+            section = section + "__"
+
+        dsect = self.dconfig.get(section)
+        if dsect is None:
+            dsect = dict()
+
+        if self.dconfig.get(section) is None and create:
+            self.dconfig[section] = dsect
+
+        return dsect
+
+    @property
+    def uri(self) -> str | None:
+        return self._uri
+
+    def init(self, key: str, value: ConfigValueType | None, section: str = ""):
+        return self.set(key, value, section, overwrite=False)
+
+    def rm(self, key: str = "", section: str = ""):
+        if section.startswith("@"):
+            raise ValueError(f'section "{key}" is defined as a runtime section and could not be deleted')
+
+        if key.startswith("@"):
+            raise ValueError(f'key "{key}" is defined as a runtime key and could not be deleted')
+
+        self._get_section(section).pop(key, None)
+
+        self._persistent_setcfg()
+
+    def get(self, key: str = "", default: ConfigValueType | None = None, *, section=""):
+        if not key:
+            return self._get_section(section)
+
+        return self._get_section(section).get(key, default)
+
+    def set(self, key: str, value: ConfigValueType | None, section="", *, overwrite: bool = True):
+        if overwrite or key not in self._get_section(section):
+            self._get_section(section, create=True)[key] = value
+            self._persistent_setcfg()
+
+        return self._get_section(section)[key]
 
 
-def _persistent_getcfg(cfg_path):
-    try:
-        with open(cfg_path) as f:
-            fcfg = _load(f)
+# decorator
+class cfg_prop:
+    def __init__(self, key: str, default: ConfigValueType | None = None, *, section: str = ""):
+        self.key = key
+        self.default = default  # type: ignore[var-annotated]
+        self.section = section
 
-        return fcfg
-    except Exception as e:
-        _log.info(f"Failed to load msys config in{cfg_path}: {str(e)}, try restore backup")
+    def __get__(self, instance, owner=None):
+        return cfg_init(self.key, self.default, section=self.section)
 
-    try:
-        with open(f"{cfg_path}.bak") as f:
-            fcfg = _load(f)
-
-        _persistent_setcfg(cfg_path, fcfg)
-
-        return fcfg
-
-    except Exception as e:
-        _log.info(f"Failed to load backup msys config in{cfg_path}: {str(e)}, config is lost...")
-
-    return
+    def __set__(self, instance, value):
+        cfg_set(self.key, value, section=self.section)
 
 
-def cfg_init(key, value, section=""):
-    return cfg_set(key, value, section, overwrite=False)
+def _validate_key_value(key: str):
+    if key.startswith(("@", "__")):
+        raise ValueError('key name could not start with "__" or "@" character')
 
 
-def cfg_set(key, value, section="", *, overwrite=True):
-    cfg_path = sys.__msys__.get("@mbase@", "")
-    fcfg = None
-
-    if section.startswith("@"):
-        raise ValueError('section name could not start with "@" character')
+def cfg_init(key: str, value: ConfigValueType | None, section: str = "") -> dict[str, ConfigValueType] | ConfigValueType:
+    _validate_key_value(key)
 
     if key.startswith(("@", "__")):
         raise ValueError('key name could not start with "__" or "@" character')
 
-    if cfg_path:
-        fcfg = _persistent_getcfg(cfg_path)
-
-    cfg = sys.__msys__ if fcfg is None else fcfg
-
-    if overwrite or key not in _cfg_get_section(cfg, section):
-        _cfg_get_section(cfg, section)[key] = value
-
-        if fcfg is not None:
-            _persistent_setcfg(cfg_path, cfg)
-
-        if fcfg and cfg_path:
-            _rebase_internal(cfg_path)
-
-    return _cfg_get_section(cfg, section)[key]
+    return service.init(key, value, section)
 
 
-def cfg_del(key, section=""):
-    cfg_path = sys.__msys__.get("@mbase@", "")
-    fcfg = None
+def cfg_del(key: str = "", section: str = ""):
+    _validate_key_value(key)
 
-    if section.startswith("@"):
-        raise ValueError(f'section "{key}" is defined as a runtime section and could not be deleted')
+    service.rm(key, section)
 
+
+def cfg_get(key: str = "", default: ConfigValueType | None = None, *, section="") -> dict[str, ConfigValueType] | ConfigValueType:
     if key.startswith("@"):
-        raise ValueError(f'key "{key}" is defined as a runtime key and could not be deleted')
+        if section:
+            raise ValueError("no section available when using key is volatile")
 
-    if cfg_path:
-        fcfg = _persistent_getcfg(cfg_path)
+        return getsysconfig().get(key, default)
 
-    cfg = sys.__msys__ if fcfg is None else fcfg
-    _cfg_get_section(cfg, section).pop(key, None)
-
-    if fcfg is not None:
-        _persistent_setcfg(cfg_path, cfg)
-
-    if fcfg is not None and cfg_path:
-        _rebase_internal(cfg_path)
+    _validate_key_value(key)
+    return service.get(key, default, section=section)
 
 
-def cfg_get(key="", default=None, *, section=""):
-    if not key:
-        return dict(_cfg_get_section(sys.__msys__, section))
-
-    return _cfg_get_section(sys.__msys__, section).get(key, default)
+def cfg_set(key: str, value: ConfigValueType, section="", *, overwrite: bool = True) -> ConfigValueType:
+    _validate_key_value(key)
+    return service.set(key, value, section, overwrite=overwrite)
 
 
-# decorator
-def cfg_prop(section=None, key=None):
-    def wrapper(func):
-        func.section = _section_name(func) if section is None else section
-        func.key = key or func.__name__
-        func.default = cfg_init(func.key, func(), section=func.section)
-
-        def _get(self):
-            return cfg_get(func.key, default=func.default, section=func.section)
-
-        def _set(self, value):
-            cfg_set(func.key, value, section=func.section)
-
-        return property(_get, _set)
-
-    return wrapper
+def getsysconfig() -> dict:
+    cfg = getattr(sys, "__msys__", None)
+    if cfg is None:
+        cfg = dict()
+        setattr(sys, "__msys__", cfg)
+    return cfg
 
 
-def _section_name(obj):
-    import inspect
+def rebase(uri: str | None = None):
+    global service
+    proto = None
+    sname = None
 
-    mod = inspect.getmodule(obj)
-    if not mod:
-        return ""
+    uri = uri or service.get("rebase") or cfg_get("@mbase@")
+    if uri:
+        url = urllib.parse.urlparse(uri)  # type: ignore[arg-type]
+        sname, _, proto = url.scheme.partition("+")
 
-    return mod.__package__ or mod.__name__
-
-
-class DynCfg:
-    def __new__(cls, *a, **kwa):
-        if not hasattr(cls, "__SECTION__"):
-            cls.__SECTION__ = _section_name(cls)
-
-        return super().__new__(cls, *a, **kwa)
-
-    def all(self):
-        return cfg_get(section=self.__SECTION__)
-
-    def init(self, key, value):
-        return cfg_init(key, value, section=self.__SECTION__)
-
-    def get(self, key, default=""):
-        return cfg_get(key, default=default, section=self.__SECTION__)
-
-    def set(self, key, value=""):
-        return cfg_set(key, value, section=self.__SECTION__)
-
-
-def find_ext():
-    if not cfg_get("search_for", section="__extensions__", default=True):
-        return
-
-    myrrh_exts = {name: exts for name, exts in metadata.entry_points().items() if name.startswith(f"{__distname__}.")}
-    sys.__msys__["@installed_extensions@"] = []
-    for _, exts in myrrh_exts.items():
-        for ext in exts:
-            sys.__msys__["@installed_extensions@"].append(_extension_string(ext.group, ext.name, ext.value))
-
-
-def _extension_string(group, name, value):
-    return f"{group}/{name}={value}"
-
-
-def _extension_partition(extension):
-    group, _, extension = extension.partition("/")
-    name, _, value = extension.partition("=")
-
-    return group, name, value
-
-
-def load_ext(extension, name_value=None):
-    cfg = cfg_get(section="__extensions__")
-
-    if name_value:
-        group = extension
-        name, value = name_value
+    if not proto:
+        uri_no_srv_name = uri
+        sname = None
     else:
-        group, name, value = _extension_partition(extension)
+        uri_no_srv_name = uri[len(sname) + 1 :]  # type: ignore[index,arg-type]
 
-    extension = _extension_string(group, name, value)
+    init_local_config_srv(uri_no_srv_name, sname)  # type: ignore[arg-type]
 
-    if extension in sys.__msys__["@loaded_extensions@"]:
-        return
-
-    if extension in sys.__msys__["@failed_extensions@"]:
-        sys.__msys__["@failed_extensions@"].remove(extension)
-
-    _log.debug(f"load extension: {group}, {name}")
-
-    try:
-        callable = metadata.EntryPoint(name, f"{group}:{value}", group).load()
-        callable(*name.split("-"))
-        sys.__msys__["@loaded_extensions@"].append(f"{extension}")
-    except (ModuleNotFoundError, ImportError, Exception) as e:
-        sys.__msys__["@failed_extensions@"].append(f"{extension}")
-        if cfg.get("raise_on_failure"):
-            raise
-        _log.debug(f"load extension failure : {group}, {name}")
-        warnings.warn(f"{''.join(traceback.format_tb(e.__traceback__))}\nFailed to load {name}, this extension will be unavailable: {str(e)}")
+    return cfg_get()
 
 
-def load_ext_group(group):
-    sys.__msys__["@actived_ext_groups@"].append(group)
+def _app_dir():
+    from click import utils
 
-    if not (cfg_get(group, section="__extensions__") or cfg_get("default_value", True, section="__extensions__")):
-        return
+    app_dir = utils.get_app_dir(__distname__)
 
-    ext_cfg = cfg_get(section=f"ext.{group}")
+    if not os.path.exists(app_dir):
+        try:
+            os.makedirs(app_dir, exist_ok=True)
+        except Exception:
+            # ignore errors => no config dir
+            pass
 
-    for name, value in ext_cfg.items():
-        load_ext(group, (name, value))
-
-    for installed in sys.__msys__["@installed_extensions@"]:
-        if installed.startswith(group):
-            load_ext(installed)
+    return app_dir
 
 
-#
-_log = logging.getLogger("myrrh")
-rebase()
+def _msys_search_paths():
+    return [os.getcwd(), os.path.expanduser(os.path.join("~", "." + __distname__)), _app_dir()]
+
+
+def _load_cfg(fpath):
+    cfg = {}
+
+    with open(fpath) as f:
+        with open(fpath) as f:
+            cfg = json.load(f)
+
+    if not isinstance(cfg, dict):
+        raise IOError(f"{fpath} incompatible configuration file type, dictionary required")
+
+    return cfg
+
+
+def _search_local_cfg(paths: list[str], filename: str) -> tuple[pathlib.Path | None, dict[str, typing.Any]]:
+    cfg = {k: v for k, v in getsysconfig().items() if not k.startswith("@")}
+
+    for path in paths:
+        fpath = pathlib.Path(os.path.join(path, filename) if (os.path.isdir(path)) else path)
+
+        if fpath.exists():
+            try:
+                cfg = _load_cfg(fpath)
+                break
+            except Exception as e:
+                warnings.warn(f'file "{fpath}" found but is invalid: {str(e)}, try to find another one')
+                fpath = None  # type: ignore[assignment]
+        else:
+            fpath = None  # type: ignore[assignment]
+
+    if fpath is None:
+        fpath = pathlib.Path(_app_dir(), filename).absolute()
+
+        if fpath.exists():
+            fpath = None
+        else:
+            try:
+                with open(fpath, "w") as f:
+                    json.dump(cfg, f, indent=_JSON_INDENT)
+                warnings.warn(f'new config file created "{fpath.as_uri()}"')
+            except Exception as e:
+                warnings.warn(f'unable to create config file "{fpath.as_uri()}", config will not be persistent: {str(e)}')
+                fpath = None
+
+    return fpath, cfg
+
+
+service: IConfigSrv = None  # type: ignore[assignment]
+
+
+def init_local_config_srv(uri: str | None = None, srv_name: str | None = None):
+    global service
+
+    if not srv_name:
+        service = DefaultConfigSrv(uri)
+    else:
+        service = ServiceRegistry().new("configs", srv_name, uri)
+
+    cfg_path = _app_dir()
+
+    sys_cfg: dict[str, typing.Any] = {
+        "@mversion@": __version__,
+        "@mpath@": os.path.dirname(_myrrh_file),
+        "@copyright@": __copyright__,
+        "@license@": __license__,
+        "@etc@": cfg_get("etc") or cfg_path,
+        "@var@": cfg_get("var") or cfg_path,
+        "@metadata@": dict(importlib.metadata.metadata("myrrh")),  # type: ignore[arg-type]
+        "@entities@": [],
+    }
+
+    getsysconfig().update(sys_cfg)
+
+    return service

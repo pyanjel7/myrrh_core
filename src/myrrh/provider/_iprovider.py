@@ -1,7 +1,7 @@
 import abc
 import typing
 
-from ._iservices import IService
+from ._iservices import IEntityService
 
 __all__ = ["IProvider"]
 
@@ -10,7 +10,7 @@ class IProvider(abc.ABC):
     _name_: str  # reserved
 
     @abc.abstractmethod
-    def services(self) -> tuple[typing.Type[IService]]:
+    def services(self) -> tuple[typing.Type[IEntityService]]:
         ...
 
     @abc.abstractmethod

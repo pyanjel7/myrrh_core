@@ -29,15 +29,15 @@ from ..objects import (
 )
 
 from ...objects.entity import Entity
-from ...services.config import cfg_init
+from ...services.config import cfg_prop
 from ....provider import Protocol as _Protocol, Wiring as _Wiring
 
 
 class RuntimeSyscall:
-    MAX_FDS = cfg_init("max_fds", None, section="myrrh.core.system")
-    POOL_SIZE = cfg_init("system_max_concurren_tasks", 10, section="myrrh.core.system")
-    IDLE_TIMEOUT = cfg_init("runtime_task_idle_timeout", 0.01, section="myrrh.core.system")
-    CHUNK_SIZE = cfg_init("runtime_stream_chunk_size", 65535, section="myrrh.core.system")
+    MAX_FDS = cfg_prop("max_fds", section="myrrh.core.system")
+    POOL_SIZE = cfg_prop("system_max_concurren_tasks", 10, section="myrrh.core.system")
+    IDLE_TIMEOUT = cfg_prop("runtime_task_idle_timeout", 0.01, section="myrrh.core.system")
+    CHUNK_SIZE = cfg_prop("runtime_stream_chunk_size", 65535, section="myrrh.core.system")
 
     Wiring = _Wiring
     Protocol = _Protocol

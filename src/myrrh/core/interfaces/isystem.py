@@ -1,7 +1,7 @@
 import abc
 import typing
 
-from ._ientity import (
+from .ientity import (
     ISystem,
     ICoreShellService,
     ICoreFileSystemService,

@@ -35,7 +35,7 @@ def man_complete(_ctx, _cli, _incomplet):
     "-d",
     "--directory",
     required=False,
-    default=cmd.option_cfg_default("man_dir", os.path.join(cfg_get(key="@etc@")[0], "man")),
+    default=cmd.option_cfg_default("man_dir", os.path.join(cfg_get(key="@etc@"), "man")),  # type: ignore[call-overload]
 )
 @pass_context
 def man(ctx: click.Context, alias_or_module_name, force_build, sub_commands, directory):

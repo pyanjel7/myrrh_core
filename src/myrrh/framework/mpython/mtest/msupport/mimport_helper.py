@@ -9,7 +9,7 @@ __mlib__ = "AbcImportHelper"
 
 
 class _interface(ABC):
-    import test.support.import_helper as local_import_helper
+    import test.support.import_helper as local_import_helper  # type: ignore[import-not-found]
 
     @abstractmethod
     def import_module(self, name, deprecated=False, *, required_on=()) -> ModuleType:

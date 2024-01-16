@@ -9,7 +9,7 @@ __mlib__ = "AbcOsHelper"
 
 
 class _interface(ABC):
-    import test.support.os_helper as local_os_helper
+    import test.support.os_helper as local_os_helper  # type: ignore[import-not-found]
 
     @property
     @abstractmethod

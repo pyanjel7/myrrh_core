@@ -8,8 +8,8 @@ import prompt_toolkit
 import bmy
 
 from myrrh.utils import mstring
-from myrrh.core.services.config import myrrh_sys, cfg_get, cfg_set, cfg_del, rebase as rebase_
-from myrrh.core.services.logging import log
+from myrrh.core.services.config import MYRRHSYS_INIT_FILENAME, cfg_get, cfg_set, cfg_del, rebase as rebase_
+from myrrh.core.services.loggings import log
 
 from myrrh.tools.myrrhc_ext import myrrhc_cmds, cmd
 from myrrh.tools.myrrhc import completion
@@ -51,7 +51,7 @@ def debug(level):
     default=None,
     type=cmd.Path(),
     required=False,
-    shell_complete=completion.local_path_completer(file_filter=lambda f: f.is_dir() or f.name == myrrh_sys),
+    shell_complete=completion.local_path_completer(file_filter=lambda f: f.is_dir() or f.name == MYRRHSYS_INIT_FILENAME),
 )
 def rebase(path):
     "Rebase myrrh system variables on file or directory where myrrh.msys is present"

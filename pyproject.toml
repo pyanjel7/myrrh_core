@@ -54,8 +54,9 @@ mtools = "myrrh.tools.mtools:__main__"
 
 "mplugins.provider.local.local_provider_ext" = "load_commands"
 
-[project.entry-points."myrrh.provider.registry"]
-"mplugins.provider.local-provider" = "register_provider"
+
+[project.entry-points."myrrh.core.services.registry"]
+"mplugins.services.mconfig-mconfig" = "register_config"
 
 [project.entry-points."myrrh.framework.mlib"]
 "myrrh.framework.mpython-py" = "register_package"
@@ -64,6 +65,9 @@ mtools = "myrrh.tools.mtools:__main__"
 
 [project.entry-points."myrrh.warehouse.registry"]
 "mplugins.provider.local-provider_settings" = "register_provider_model"
+
+[project.entry-points."myrrh.provider.registry"]
+"mplugins.provider.local-provider" = "register_provider"
 
 [build-system]
 requires = [
@@ -87,7 +91,7 @@ line_length = 300
 ignore-words-list = "inout, crasher, invokations, worl, te"
 
 [tool.mypy]
-disable_error_code = ["import-untyped", "import-not-found", "abstract"]
+disable_error_code = ["import-untyped", "abstract"]
 allow_redefinition = true
 namespace_packages = false
 files = [ "src" ]

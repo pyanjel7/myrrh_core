@@ -5,9 +5,9 @@ import threading
 from functools import wraps
 
 from myrrh.core.objects import groups
-from myrrh.core.services.config import cfg_init
+from myrrh.core.services.config import cfg_prop
 
-from myrrh.core.services.logging import log
+from myrrh.core.services.loggings import log
 
 from ._bmy_exceptions import BmyInvalidEid, BmyEidInUsed
 from ._bmy_entity import BmyEntity
@@ -76,16 +76,16 @@ class _BmyHistoryCollection(collections.deque):
 
 
 class _BmyEntitiesLocal(threading.local):
-    _HISTORY_SZ = cfg_init("history_size", 20, section="myrrh.framework.bmy")
+    _history_sz = cfg_prop("history_size", 20, section="myrrh.framework.bmy")
 
     def __init__(self):
-        self.history = _BmyHistoryCollection((None,) * (self._HISTORY_SZ), maxlen=self._HISTORY_SZ)
+        self.history = _BmyHistoryCollection((None,) * (self._history_sz), maxlen=self._history_sz)
 
 
 class _BmyEntities:
     _entities: dict[str, BmyEntity] = {}
     _lock_entities = threading.RLock()
-    _HISTORY_SZ = cfg_init("history_size", 20, section="myrrh.framework.bmy")
+    _HISTORY_SZ = cfg_prop("history_size", 20, section="myrrh.framework.bmy")
 
     _thread_locals = _BmyEntitiesLocal()
 

@@ -9,8 +9,8 @@ import functools
 from traceback import format_exc
 
 from myrrh import factory
-from myrrh.core.services.config import cfg_init
-from myrrh.core.services.logging import log
+from myrrh.core.services.config import cfg_prop
+from myrrh.core.services.loggings import log
 from myrrh.framework import Runtime
 from myrrh.utils import mshlex
 from myrrh.utils.filemode import filemode
@@ -93,14 +93,19 @@ __all__ = [
     "bmy_func",
 ]
 
-FILE_EXT = cfg_init("myrrh_file_ext", ".emyrrh", section="myrrh.framework.bmy")
-BMY_ASYNC = cfg_init("use_async_group_for_bmy", True, section="myrrh.framework.bmy")
-EXEC_MEMORY_LEN = cfg_init("execute_memory_len", 200, section="myrrh.framework.bmy")
 
-if BMY_ASYNC:
-    _func = groups.myrrh_group_async
-else:
-    _func = groups.myrrh_group
+class CONFIG:
+
+    FILE_EXT = cfg_prop("myrrh_file_ext", ".emyrrh", section="myrrh.framework.bmy")
+    BMY_ASYNC = cfg_prop("use_async_group_for_bmy", True, section="myrrh.framework.bmy")
+    EXEC_MEMORY_LEN = cfg_prop("execute_memory_len", 200, section="myrrh.framework.bmy")
+
+    @property
+    def _func(self):
+        if self.BMY_ASYNC:
+            return groups.myrrh_group_async
+        return groups.myrrh_group
+
 
 
 def bmy_func(valid_eid_required=True, attr_name="eid", attr_type=None):
@@ -121,7 +126,7 @@ def bmy_func(valid_eid_required=True, attr_name="eid", attr_type=None):
 
             try:
                 if entities.isgroup(eid):
-                    return _func(func)(*args, **kwargs, eid=groups.MyrrhGroup(keys=eid))
+                    return CONFIG()._func(func)(*args, **kwargs, eid=groups.MyrrhGroup(keys=eid))
 
                 kwargs[attr_name] = eid
                 return func(*args, **kwargs)
@@ -367,7 +372,7 @@ def new(path: str | list[str], eid, *, warehouse=[], pre=[], post=[], **kwargs):
 @bmy_func(attr_type="entity")
 def save(path=None, full=False, *, eid):
     if os.path.isdir(path):
-        path = os.path.join(path, "".join((eid.eid, FILE_EXT)))
+        path = os.path.join(path, "".join((eid.eid, CONFIG().FILE_EXT)))
 
     if not path:
         path = "".join(eid, ".emyyrh")
@@ -378,12 +383,12 @@ def save(path=None, full=False, *, eid):
 
 def load(path=None, eid=None):
     f"""
-    Loads an entity information file ('{FILE_EXT}' file)
+    Loads an entity information file ('{CONFIG().FILE_EXT}' file)
 
     This function is similar to:func:`bmy.new` excepts that the list of predefined warehouse is loaded from an emyrrh file
 
     Args:
-        path (str|list|tuple): path to entity "{FILE_EXT}" file
+        path (str|list|tuple): path to entity "{CONFIG().FILE_EXT}" file
         eid (str|list|tuple): entity eid
     Returns:
         str|list: eid of the newly created entity
@@ -393,7 +398,7 @@ def load(path=None, eid=None):
         path = os.getcwd()
 
     if os.path.isdir(path):
-        paths = glob.glob(os.path.join(path, f"*{FILE_EXT}"))
+        paths = glob.glob(os.path.join(path, f"*{CONFIG().FILE_EXT}"))
         path = []
     else:
         paths = [path]
@@ -562,7 +567,7 @@ def execute(
     return exe
 
 
-execute.mem = collections.deque(maxlen=EXEC_MEMORY_LEN)
+execute.mem = collections.deque(maxlen=CONFIG().EXEC_MEMORY_LEN)
 execute.TimeoutExpired = madvsh.TimeoutExpired
 execute.TTLExpired = madvsh.TTLExpired
 

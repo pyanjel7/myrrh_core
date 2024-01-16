@@ -106,17 +106,17 @@ class RegisterBasicTests(unittest.TestCase):
     def test_basic_register_item(self):
         from myrrh.warehouse.item import BaseItem
 
-        class PluginItem(BaseItem[typing.Literal["plugin"]]):
-            type_: typing.Literal["plugin"]
+        class PluginItem(BaseItem[typing.Literal["pluggin"]]):
+            type_: typing.Literal["pluggin"]
             val: str
 
         ItemRegistry().register_warehouse(PluginItem)
-        c = ItemRegistry().warehouse_model_validate({"type_": "plugin", "val": "value"})
+        c = ItemRegistry().warehouse_model_validate({"type_": "pluggin", "val": "value"})
 
         self.assertIsInstance(c, PluginItem)
-        self.assertEqual(c.type_, "plugin")
+        self.assertEqual(c.type_, "pluggin")
         self.assertEqual(c.val, "value")
-        self.assertIn("plugin", ItemRegistry().items)
+        self.assertIn("pluggin", ItemRegistry().items)
 
     def test_basic_register_provider_model(self):
         import myrrh.warehouse

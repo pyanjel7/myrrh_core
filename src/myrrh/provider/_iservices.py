@@ -11,7 +11,7 @@ __all__ = (
     "IInstanceService",
     "ServiceGroup",
     "Protocol",
-    "IService",
+    "IEntityService",
     "Stat",
     "Wiring",
     "Whence",
@@ -78,7 +78,7 @@ class Protocol(enum.Enum):
         return self._value_
 
 
-class IService(abc.ABC):
+class IEntityService(abc.ABC):
     category: str
     name: str
     protocol: Protocol | str
@@ -88,9 +88,9 @@ T = typing.TypeVar("T")
 
 
 class ServiceGroup(enum.Enum):
-    vendor = abc.ABCMeta("IServiceVendor", (IService,), dict())
-    system = abc.ABCMeta("IServiceSystem", (IService,), dict())
-    host = abc.ABCMeta("IServiceHost", (IService,), dict())
+    vendor = abc.ABCMeta("IEntityServiceVendor", (IEntityService,), dict())
+    system = abc.ABCMeta("IEntityServiceSystem", (IEntityService,), dict())
+    host = abc.ABCMeta("IEntityServiceHost", (IEntityService,), dict())
 
     def __init__(self, cls):
         cls.category = self.name

@@ -6,22 +6,18 @@ import datetime
 import pydantic
 import pydantic.json
 
-from myrrh.core.services.config import cfg_init
-
 __all__ = ["NoneItem", "BaseItem", "GenericItem", "NoneItemType"]
 
 ItemT = typing.TypeVar("ItemT")
 
 
 class BaseItem(pydantic.BaseModel, typing.Generic[ItemT]):
-    _utc = cfg_init("dom_in_utc", False, section="myrrh.item")
-
     type_: ItemT = None  # type: ignore[assignment]
 
     DOM: pydantic.types.PastDatetime | None = None
     SLL: datetime.timedelta | None = None
     UBD: datetime.datetime | None = None
-    UTC: bool = _utc
+    UTC: bool | None = None
 
     model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True, frozen=True)
 
@@ -62,7 +58,7 @@ class BaseItem(pydantic.BaseModel, typing.Generic[ItemT]):
         type_ = data.get("type_") or cls._type_()
         data["type_"] = type_
 
-        utc = data.get("UTC", cls._utc)
+        utc = data.get("UTC", False)
 
         SLL = data.get("SLL")
         if SLL is not None and SLL < datetime.timedelta():

@@ -24,7 +24,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 import bmy
 
 from myrrh.core.services.config import cfg_get
-from myrrh.core.services.logging import log
+from myrrh.core.services.loggings import log
 
 from myrrh.utils import mshlex
 
@@ -41,7 +41,7 @@ HISTORY_CHAR = "!"
 
 class History(history.FileHistory):
     def __init__(self) -> None:
-        super().__init__(os.path.expanduser(os.path.join(cfg_get("@etc@", default=["~"])[0], ".myrrhc.history")))
+        super().__init__(os.path.expanduser(os.path.join(cfg_get("@etc@", default="~"), ".myrrhc.history")))  # type: ignore[arg-type]
 
 
 class AutoSuggest(auto_suggest.AutoSuggest):
