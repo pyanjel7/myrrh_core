@@ -2,7 +2,6 @@ import importlib
 import typing
 
 from myrrh.core.services.plugins import load_ext_group
-from myrrh.core.objects.entity import CoreProviderClass
 
 from ._iprovider import IProvider
 
@@ -63,21 +62,25 @@ class ProviderRegistry:
 
         return version
 
-    def _new_provider(self, name, provider_cls: typing.Type[IProvider]):
+    def _new_provider(self, provider_cls: typing.Type[IProvider]):
         assert issubclass(provider_cls, IProvider), f"{repr(provider_cls)} is not a valid provider implementation, provider must inherit from IProvider"
 
-        self.providers[name] = CoreProviderClass(provider_cls, name)
+        self.providers[provider_cls._name_] = provider_cls
 
-    def register(self, module_name, provider_cls):
-        _, _, provider_name = module_name.rpartition(".")
+    def register(self, provider_cls):
 
-        self._new_provider(provider_name, provider_cls)
+        self._new_provider(provider_cls)
 
 
-def register_provider(module_name: str, provider: str):
-    module = importlib.import_module(module_name)
-    provider_cls = getattr(module, provider)
-    return ProviderRegistry().register(module_name, provider_cls)
+def register_provider(module: str):
+    mod = importlib.import_module(module)
+    provider_cls = getattr(mod, "Provider")
+
+    if not isinstance(provider_cls, (list, tuple)):
+        provider_cls = [provider_cls]
+
+    for provider in provider_cls:
+        ProviderRegistry().register(provider)
 
 
 load_ext_group("myrrh.provider.registry")

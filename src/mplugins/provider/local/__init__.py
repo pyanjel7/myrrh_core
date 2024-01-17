@@ -58,10 +58,11 @@ class LocalProviderSettings(myrrh.warehouse.Settings):
     cwd: str | None = None
 
 
-class Provider(myrrh.provider.IProvider):
+class LocalProvider(myrrh.provider.IProvider):
     """
     Local tools commands
     """
+    _name_ = 'local'
 
     def __init__(self, settings=None):
         """
@@ -107,5 +108,5 @@ class Provider(myrrh.provider.IProvider):
                 return dict()
 
 
-provider = Provider
-provider_settings = LocalProviderSettings
+Provider = LocalProvider
+ProviderSettings = LocalProviderSettings

@@ -3,7 +3,7 @@ import threading
 import fnmatch
 import typing
 
-from mplugins.provider.local import provider
+from mplugins.provider.local import Provider
 
 from ...utils.delegation import NoneDelegation, ABCDelegation, ABCDelegationMeta
 
@@ -31,7 +31,6 @@ from ._registry import Registry
 __all__ = [
     "Entity",
     "CoreEServiceClass",
-    "CoreProviderClass",
     "CoreProvider",
     "NoneShell",
     "NoneFs",
@@ -162,18 +161,6 @@ class Vendor(_EServiceGroup):
         super().__init__(EServiceGroup.vendor, cfg, services)
 
 
-def CoreProviderClass(provider_cls, name) -> typing.Type[IProvider]:
-    class _(IProvider, ABCDelegation):
-        __delegated__ = (IProvider,)
-        _name_ = name
-        _provider_ = provider_cls
-
-        def __init__(self, *a, **kwa):
-            self.__delegate__(IProvider, self._provider_(*a, **kwa))
-
-    return ABCDelegationMeta(_._provider_.__name__, _.__bases__, dict(_.__dict__))  # type: ignore[return-value]
-
-
 def CoreEServiceClass(path, serv_cls, pname):
     ServInterface = EServiceGroup[serv_cls.category].__interfaces__[serv_cls.name]
 
@@ -200,6 +187,8 @@ def CoreEServiceClass(path, serv_cls, pname):
 class CoreProvider(IProvider):
     SERV = 0
     CTLG = 1
+
+    _name_ = 'CoreProvider'
 
     def __init__(
         self,
@@ -319,4 +308,4 @@ class Entity:
         return "Entity<%s>" % self.eid
 
 
-setattr(Entity, ".", Entity(CoreProvider((CoreProviderClass(provider, ".")(),))))
+setattr(Entity, ".", Entity(CoreProvider([Provider()]),))

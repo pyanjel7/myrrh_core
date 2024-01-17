@@ -1,0 +1,22 @@
+ {
+    "label" : "debian",
+
+    "os" : "posix",
+    "fsencoding": "utf8",
+    "fsencodeerrors": "utf8",
+    "encoding": "utf8",
+    "default_shell_encoding": "utf8",
+    "shells": "sh:bash:rbash:dash",
+
+    "eol" : "\n",
+    "curdir" : ".",
+    "pardir" : "..",
+    "extsep" : ".",
+    "sep" : "/",
+    "pathsep" : ":",
+    
+    "defpath" : "/bin:/usr/bin",
+    "tmpdir": "/tmp",
+    "devnull": "/dev/null"
+}
+

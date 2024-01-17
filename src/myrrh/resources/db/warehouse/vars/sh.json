@@ -1,0 +1,4 @@
+{
+    "label": "sh",
+    "readonly": ["PPID", "SHELLOPTS"]
+}

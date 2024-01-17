@@ -38,29 +38,29 @@ class PluginSrv:
     def load_ext(self, extension, *, type: str | None = None, kind="", raise_on_failure=False):
         type = type or cfg_get(extension, "ondemand", section="extensions")
 
-        group, name, value = self._extension_partition(extension)
-
-        if type == "never" or kind and value != kind:
+        if type == "never":
             return
-
-        extension = self._extension_string(group, name, value)
 
         if extension in cfg_get("@loaded_extensions@"):  # type: ignore[operator]
             return
-
+        
+        group, ext_value, ext_kind = self._extension_partition(extension)
+        if kind and ext_kind != kind:
+            return
+        
         if extension in cfg_get("@failed_extensions@"):  # type: ignore[operator, uniion-attr]
             cfg_get("@failed_extensions@").remove(extension)  # type: ignore[union-attr]
-
+        
         try:
-            callable = importlib.metadata.EntryPoint(name, f"{group}:{value}", group).load()
-            callable(*name.split("-"))
+            callable = importlib.metadata.EntryPoint(ext_value, f"{group}:{ext_kind}", group).load()
+            callable(*ext_value.split("-"))
             cfg_get("@loaded_extensions@").append(f"{extension}")  # type: ignore[union-attr]
         except (ModuleNotFoundError, ImportError, Exception) as e:
             cfg_get("@failed_extensions@").append(f"{extension}")  # type: ignore[union-attr]
             if kind == "always" or (raise_on_failure and type not in ("try", "ondemand")):
-                raise RuntimeError(f"Failed to load {name}: {str(e)}")
+                raise RuntimeError(f"Failed to load {ext_value}: {str(e)}")
             else:
-                warnings.warn(f"{''.join(traceback.format_tb(e.__traceback__))}\nFailed to load {name}, this extension will be unavailable: {str(e)}")
+                warnings.warn(f"{''.join(traceback.format_tb(e.__traceback__))}\nFailed to load {ext_value}, this extension will be unavailable: {str(e)}")
 
     def load_ext_group(self, group: str, *, kind: str = "", raise_on_failure=False):
         for installed, type_ in cfg_get("@installed_extensions@").items():  # type: ignore[union-attr]

@@ -64,10 +64,10 @@ mtools = "myrrh.tools.mtools:__main__"
 "myrrh.framework.msh-sh" = "register_package"
 
 [project.entry-points."myrrh.warehouse.registry"]
-"mplugins.provider.local-provider_settings" = "register_provider_model"
+"mplugins.provider.local" = "register_provider_settings"
 
 [project.entry-points."myrrh.provider.registry"]
-"mplugins.provider.local-provider" = "register_provider"
+"mplugins.provider.local" = "register_provider"
 
 [build-system]
 requires = [

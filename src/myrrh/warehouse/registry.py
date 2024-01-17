@@ -110,16 +110,26 @@ class ItemRegistry:
             pass
 
 
-def register_warehouse(module_name: str, item: str):
-    module = importlib.import_module(module_name)
-    item_cls = getattr(module, item)
-    return ItemRegistry().register_warehouse(item_cls)
+def register_warehouse(module: str):
+    mod = importlib.import_module(module)
+    item_cls = getattr(mod, "WarehouseItem")
+
+    if not isinstance(item_cls, (list, tuple)):
+        item_cls = [item_cls]
+
+    for item in item_cls:
+        return ItemRegistry().register_warehouse(item)
 
 
-def register_provider_model(module_name: str, model: str):
-    module = importlib.import_module(module_name)
-    model_cls = getattr(module, model)
-    return ItemRegistry().register_provider_model(model_cls)
+def register_provider_settings(module: str):
+    mod = importlib.import_module(module)
+    model_cls = getattr(mod, "ProviderSettings")
+
+    if not isinstance(model_cls, (list, tuple)):
+        model_cls = [model_cls]
+
+    for model in model_cls:
+        ItemRegistry().register_provider_model(model)
 
 
 load_ext_group("myrrh.warehouse.registry")
