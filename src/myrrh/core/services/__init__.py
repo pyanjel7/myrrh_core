@@ -3,7 +3,6 @@ import warnings
 from .config import init_local_config_srv, rebase
 
 from .plugins import init_pluggin_srv, load_ext_group
-from .secrets import init_secret_srv
 from .loggings import init_logging_srv
 
 
@@ -23,7 +22,6 @@ def init():
 
     init_logging_srv()
 
-    init_secret_srv()
-
+    # other services should be initialized by module itself
 
 init()

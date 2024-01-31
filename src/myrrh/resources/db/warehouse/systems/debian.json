@@ -1,5 +1,6 @@
  {
     "label" : "debian",
+    "tags" : "posix,sh,debian",
 
     "os" : "posix",
     "fsencoding": "utf8",

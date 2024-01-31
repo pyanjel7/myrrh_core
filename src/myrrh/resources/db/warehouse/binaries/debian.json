@@ -1,5 +1,7 @@
 {
     "label" : "debian",
+    "description" :  "debian minimal list",
+    "tags" : "posix,sh,debian",
 
     "find": "/usr/bin/find",
     "ln": "/bin/ln",

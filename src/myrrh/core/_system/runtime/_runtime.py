@@ -40,6 +40,7 @@ def _validate_exe_args_values(command, working_dir, env):
     if working_dir and b"\x00" in working_dir:
         raise ValueError("Invalid \\x00 not allowed in working directory")
 
+class Ab
 
 class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
     @property
@@ -170,18 +171,18 @@ class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
     pathsepb = runtime_cached_property("pathsepb")("_pathsepb_")  # type: ignore[assignment]
     altsepb = runtime_cached_property("altsepb")("_altsepb_")  # type: ignore[assignment]
     linesepb = runtime_cached_property("linesepb")("_linesepb_")  # type: ignore[assignment]
-    defpathb = runtime_cached_property("defpathb", init_cfg_path="system.defpathb")("_defpathb_")  # type: ignore[assignment]
-    devnullb = runtime_cached_property("devnullb", init_cfg_path="system.devnullb")("_devnullb_")  # type: ignore[assignment]
+    defpathb = runtime_cached_property("defpathb", init_cfg_path="system.defpath(b)")("_defpathb_")  # type: ignore[assignment]
+    devnullb = runtime_cached_property("devnullb", init_cfg_path="system.devnull(b)")("_devnullb_")  # type: ignore[assignment]
 
-    @runtime_cached_property("_shellb", init_cfg_path="system.shellb")
+    @runtime_cached_property("_shellb", init_cfg_path="system.shell(b)")
     def shellb(self):
         return self._getdefaultshellb_()
 
-    @runtime_cached_property("_shellargsb", init_cfg_path="system.shellargsb")
+    @runtime_cached_property("_shellargsb", init_cfg_path="system.shellargs(b)")
     def shellargsb(self):
         return self._getdefaultshellargsb_()
 
-    @runtime_cached_property("envb", init_value=dict(), init_cfg_path="system.envb")
+    @runtime_cached_property("envb", init_value=dict(), init_cfg_path="system.env(b)")
     def envb(self):
         new_env = MyrrhEnviron({}, conv=self.fsencode, keyformat=self.environkeyformat)
 
@@ -194,15 +195,15 @@ class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
 
         return new_env
 
-    @runtime_cached_property("cwdb", init_cfg_path="system.cwdb")
+    @runtime_cached_property("cwdb", init_cfg_path="system.cwd(b)")
     def cwdb(self):
         return self._getcwdb_()
 
-    @runtime_cached_property("tmpdirb", init_cfg_path="system.tmpdirb")
+    @runtime_cached_property("tmpdirb", init_cfg_path="system.tmpdir(b)")
     def tmpdirb(self):
         return self._gettmpdirb_()
 
-    @runtime_cached_property("rdenvb", init_cfg_path="system.rdenvb")
+    @runtime_cached_property("rdenvb", init_cfg_path="system.rdenv(b)")
     def rdenvb(self):
         return self._getreadonlyenvb_()
 
@@ -222,7 +223,7 @@ class AbcMyrrhOs(IMyrrhOs, ABCDelegation):
     def localcode(self):
         return self._localecode_()
 
-    @runtime_cached_property("binb", init_cfg_path="system.binb")
+    @runtime_cached_property("binb", init_cfg_path="system.bin", encode='system.fsencoding', errors='system.fsencodeerrors')
     def getbinb(self):
         return self._getbinb_()
 
@@ -490,8 +491,11 @@ class AbcRuntime(ABC):
                 raise TypeError('no system type specified for %s, required "posix" or "nt"' % system.cfg.id)
 
             if not myrrh_os:
-                modsys = importlib.import_module(f"myrrh.framework.arch.{arch}.myrrhos")
-                myrrhos_cls = getattr(modsys, "MyrrhOs")
+                mod_myrrhos_path = system.cfg.system.myrrhos or f"myrrh.framework.arch.{arch}.myrrhos"
+
+                mod_myrrhos = importlib.import_module(mod_myrrhos_path)
+        
+                myrrhos_cls = getattr(mod_myrrhos, "MyrrhOs")
                 myrrh_os = myrrhos_cls(system)
 
                 myrrh_syscall = RuntimeSyscall(myrrh_os)

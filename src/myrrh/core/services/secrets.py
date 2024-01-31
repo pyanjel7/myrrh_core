@@ -218,3 +218,6 @@ def init_secret_srv(name: str | None = None, *a, **kwa):
 
 def __getattr__(name):
     return getattr(service, name)
+
+
+init_secret_srv()

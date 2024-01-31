@@ -162,3 +162,49 @@ def bytestohostport(host, port=None):
         host = host[1:-1]
 
     return (host, port)
+
+
+def encode(value, encoding: str = "utf8", encode_errors: str = "strict") -> bytes | list[bytes] | dict[bytes, bytes]:
+    if isinstance(value, bytes):
+        return value
+
+    if isinstance(value, (list, tuple)):
+        return [encode(s, encoding, encode_errors) for s in value]  # type: ignore[misc]
+
+    if isinstance(value, dict):
+        return {encode(k, encoding, encode_errors): encode(v, encoding, encode_errors) for k, v in value.items()}  # type: ignore[misc]
+
+    if isinstance(value, str):
+        return value.encode(encoding or "utf8", errors=encode_errors)
+
+    return value
+
+
+def decode(value, encoding: str = "utf8", encode_errors: str = "strict") -> str | list[str] | dict[str, str]:
+    if isinstance(value, str):
+        return value
+
+    if isinstance(value, (list, tuple)):
+        return [decode(b, encoding, encode_errors) for b in value]  # type: ignore[misc]
+
+    if isinstance(value, dict):
+        return {decode(k, encoding, encode_errors): decode(v, encoding, encode_errors) for k, v in value.items()}  # type: ignore[misc]
+
+    if isinstance(value, bytes):
+        return value.decode(encoding or "utf8", errors=encode_errors)
+
+    return value
+
+
+def encoder(encoding: str = "utf8", encode_errors: str = "strict"):
+    def wrapper(value):
+        return encode(value, encoding, encode_errors)
+
+    return wrapper
+
+
+def decoder(encoding: str = "utf8", encode_errors: str = "strict"):
+    def wrapper(value):
+        return decode(value, encoding, encode_errors)
+
+    return wrapper

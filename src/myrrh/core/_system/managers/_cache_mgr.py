@@ -3,6 +3,7 @@ import threading
 import time
 import typing
 
+from myrrh.utils import mstring
 from myrrh.warehouse.item import NoneItem
 
 from ...services.config import cfg_init
@@ -46,10 +47,15 @@ class RuntimeCache(dict):
 def init_cache(cache, system):
     for k, d in _runtime_status.items():
         if getattr(system.__class__, d["property"].property_name, None):
+ 
             cfg_path = d["init_cfg_path"]
+            encode = d["encode"]
+            errors = d["errors"]
+
+            coder = mstring.encoder(encode, errors or 'strict') if encode else (lambda s: s)
 
             if cfg_path and system.cfg[cfg_path] is not NoneItem:
-                cache[k] = system.cfg[cfg_path]
+                cache[k] = coder(system.cfg[cfg_path])
 
             if d["init_at_creation_time"]:
                 cache[k] = d["property"].get(system, cache)
@@ -135,6 +141,8 @@ def runtime_cached_property(
     init_cfg_path=None,
     init_at_creation_time=False,
     validity=None,
+    encode=None,
+    errors=None
 ) -> typing.Callable[[typing.Any], typing.Any]:
     if validity is None:
         validity = cfg_init("default_cache_validity", -1, section="runtime")
@@ -150,6 +158,8 @@ def runtime_cached_property(
             "init_cfg_path": init_cfg_path,
             "date": 0,
             "validity": validity,
+            "encode": encode,
+            "errors": errors,
             "property": _RuntimeProperty(func, name),
         }
 

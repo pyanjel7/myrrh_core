@@ -1,6 +1,7 @@
 {
     "label" : "sh",
     "description" : "Bourne Shell",
+    "tags" : "posix,sh",
 
     "shell" : "%(sh)s",
     "shellargs": [ "-c" ],

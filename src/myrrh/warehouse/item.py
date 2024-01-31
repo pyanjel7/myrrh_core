@@ -19,6 +19,10 @@ class BaseItem(pydantic.BaseModel, typing.Generic[ItemT]):
     UBD: datetime.datetime | None = None
     UTC: bool | None = None
 
+    label: str = ""
+    tags: str = ""
+    description: str = ""
+
     model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True, frozen=True)
 
     def now(self):

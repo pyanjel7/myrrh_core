@@ -1,4 +1,5 @@
 {
     "label": "sh",
+    "tags" : "posix,sh",
     "readonly": ["PPID", "SHELLOPTS"]
 }

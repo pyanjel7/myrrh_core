@@ -49,6 +49,7 @@ class Registry(IRegistry):
         with self.lock:
             name, _, next = name.partition(".")
             item = super().get(name, NoneItem)
+            
             if not item:
                 updaters = self._item_updaters.get(name) or list()
                 for p in updaters:

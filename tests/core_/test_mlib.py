@@ -50,7 +50,7 @@ class BasicTest(_MLibTest):
         self.assertIsNot(os, os1)
         self.assertIsNot(os, os2)
 
-        from myrrh.core.interfaces import ABCDelegationMeta
+        from myrrh.utils.delegation import ABCDelegationMeta
 
         self.assertIsInstance(os, ABCDelegationMeta)
 
@@ -70,7 +70,7 @@ class BasicTest(_MLibTest):
         self.assertIsNot(os, os1)
         self.assertIsNot(os, os2)
 
-        from myrrh.core.interfaces import ABCDelegationMeta
+        from myrrh.utils.delegation import ABCDelegationMeta
 
         self.assertIsInstance(os, ABCDelegationMeta)
 
