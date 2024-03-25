@@ -1,7 +1,7 @@
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 from . import mimportlib
@@ -14,59 +14,47 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def uname_result(self) -> local_platform.uname_result:
-        ...
+    def uname_result(self) -> local_platform.uname_result: ...
 
     @property
     @abstractmethod
-    def _ver_output(self):
-        ...
+    def _ver_output(self): ...
 
     @property
     @abstractmethod
-    def _WIN32_CLIENT_RELEASES(self):
-        ...
+    def _WIN32_CLIENT_RELEASES(self): ...
 
     @property
     @abstractmethod
-    def _WIN32_SERVER_RELEASES(self):
-        ...
+    def _WIN32_SERVER_RELEASES(self): ...
 
     @property
     @abstractmethod
-    def _Processor(self):
-        ...
+    def _Processor(self): ...
 
     @property
     @abstractmethod
-    def _sys_version(self):
-        ...
+    def _sys_version(self): ...
 
     @property
     @abstractmethod
-    def _sys_version_cache(self):
-        ...
+    def _sys_version_cache(self): ...
 
     @property
     @abstractmethod
-    def _os_release_candidates(self):
-        ...
+    def _os_release_candidates(self): ...
 
     @abstractmethod
-    def win32_is_iot(self) -> bool:
-        ...
+    def win32_is_iot(self) -> bool: ...
 
     @abstractmethod
-    def win32_edition(self) -> str:
-        ...
+    def win32_edition(self) -> str: ...
 
     @abstractmethod
-    def win32_ver(self, release: str = ..., version: str = ..., csd: str = ..., ptype: str = ...) -> tuple[str, str, str, str]:
-        ...
+    def win32_ver(self, release: str = ..., version: str = ..., csd: str = ..., ptype: str = ...) -> tuple[str, str, str, str]: ...
 
     @abstractmethod
-    def mac_ver(self, release: str = ..., version: str = ..., csd: str = ..., ptype: str = ...) -> tuple[str, str, str, str]:
-        ...
+    def mac_ver(self, release: str = ..., version: str = ..., csd: str = ..., ptype: str = ...) -> tuple[str, str, str, str]: ...
 
     @abstractmethod
     def java_ver(
@@ -75,82 +63,68 @@ class _interface(ABC):
         vendor: str = ...,
         vminfo: tuple[str, str, str] = ...,
         osinfo: tuple[str, str, str] = ...,
-    ) -> tuple[str, str, tuple[str, str, str], tuple[str, str, str]]:
-        ...
+    ) -> tuple[str, str, tuple[str, str, str], tuple[str, str, str]]: ...
 
     @abstractmethod
-    def architecture(self, executable: str = ..., bits: str = ..., linkage: str = ...) -> tuple[str, str]:
-        ...
+    def architecture(self, executable: str = ..., bits: str = ..., linkage: str = ...) -> tuple[str, str]: ...
 
     @abstractmethod
-    def uname(self) -> str:
-        ...
+    def uname(self) -> str: ...
 
     @abstractmethod
-    def system(self) -> str:
-        ...
+    def system(self) -> str: ...
 
     @abstractmethod
-    def node(self) -> str:
-        ...
+    def node(self) -> str: ...
 
     @abstractmethod
-    def release(self) -> str:
-        ...
+    def release(self) -> str: ...
 
     @abstractmethod
-    def version(self) -> str:
-        ...
+    def version(self) -> str: ...
 
     @abstractmethod
-    def machine(self) -> str:
-        ...
+    def machine(self) -> str: ...
 
     @abstractmethod
-    def processor(self) -> str:
-        ...
+    def processor(self) -> str: ...
 
     @abstractmethod
-    def python_implementation(self) -> str:
-        ...
+    def python_implementation(self) -> str: ...
 
     @abstractmethod
-    def python_version(self) -> str:
-        ...
+    def python_version(self) -> str: ...
 
     @abstractmethod
-    def python_version_tuple(self) -> tuple[str, str, str]:
-        ...
+    def python_version_tuple(self) -> tuple[str, str, str]: ...
 
     @abstractmethod
-    def python_branch(self) -> str:
-        ...
+    def python_branch(self) -> str: ...
 
     @abstractmethod
-    def python_revision(self) -> str:
-        ...
+    def python_revision(self) -> str: ...
 
     @abstractmethod
-    def python_build(self) -> tuple[str, str]:
-        ...
+    def python_build(self) -> tuple[str, str]: ...
 
     @abstractmethod
-    def python_compiler(self) -> str:
-        ...
+    def python_compiler(self) -> str: ...
 
     @abstractmethod
-    def platform(self, aliased: bool = ..., terse: bool = ...) -> str:
-        ...
+    def platform(self, aliased: bool = ..., terse: bool = ...) -> str: ...
 
     @abstractmethod
-    def freedesktop_os_release(self) -> dict[str, str]:
-        ...
+    def freedesktop_os_release(self) -> dict[str, str]: ...
 
     @abstractmethod
-    def system_alias(
-        self, system: typing.Any, release: typing.Any, version: typing.Any
-    ) -> tuple | tuple[typing.Any | typing.Literal["Solaris", "Windows"], str | typing.Any, typing.Any,]:
-        ...
+    def system_alias(self, system: typing.Any, release: typing.Any, version: typing.Any) -> (
+        tuple
+        | tuple[
+            typing.Any | typing.Literal["Solaris", "Windows"],
+            str | typing.Any,
+            typing.Any,
+        ]
+    ): ...
 
     @abstractmethod
     def libc_ver(
@@ -159,40 +133,31 @@ class _interface(ABC):
         lib: str = "",
         version: str = "",
         chunksize: int = 16384,
-    ) -> typing.Any:
-        ...
+    ) -> typing.Any: ...
 
     @abstractmethod
-    def _parse_os_release(self):
-        ...
+    def _parse_os_release(self): ...
 
     @abstractmethod
-    def _platform_cache(self):
-        ...
+    def _platform_cache(self): ...
 
     @abstractmethod
-    def _follow_symlinks(self):
-        ...
+    def _follow_symlinks(self): ...
 
     @abstractmethod
-    def _syscmd_ver(self):
-        ...
+    def _syscmd_ver(self): ...
 
     @abstractmethod
-    def _norm_version(self):
-        ...
+    def _norm_version(self): ...
 
     @abstractmethod
-    def _uname_cache(self):
-        ...
+    def _uname_cache(self): ...
 
     @abstractmethod
-    def _node(self):
-        ...
+    def _node(self): ...
 
     @abstractmethod
-    def _syscmd_file(self):
-        ...
+    def _syscmd_file(self): ...
 
 
 class AbcPlatform(_interface, AbcRuntimeDelegate):
@@ -242,7 +207,7 @@ class AbcPlatform(_interface, AbcRuntimeDelegate):
             return system, release, version
 
         # Try some common cmd strings
-        for cmd in (b"ver", b"command /c ver", b'cmd /c "ver"'):
+        for cmd in ("ver", "command /c ver", 'cmd /c "ver"'):
             # try:
             #    info = subprocess.check_output(cmd,
             #                                stdin=subprocess.DEVNULL,
@@ -289,7 +254,7 @@ class AbcPlatform(_interface, AbcRuntimeDelegate):
         """
         import re
 
-        _, e, _ = self.myrrh_os.cmd(b"%(java)s -XshowSettings:properties", java=b"java")
+        _, e, _ = self.myrrh_os.cmd("%(java)s -XshowSettings:properties", java="java")
 
         props = re.findall(r"([.\w]+) = ([\S ]+)", e)
         if not props:
@@ -315,7 +280,7 @@ class AbcPlatform(_interface, AbcRuntimeDelegate):
         return release, vendor, vminfo, osinfo
 
     def _myrrh_node(self, default=""):
-        o, _, r = self.myrrh_os.cmd(b"%(hostname)s", hostname=b"hostname")
+        o, _, r = self.myrrh_os.cmd("%(hostname)s", hostname="hostname")
         if r:
             return default
         return o.strip()
@@ -346,15 +311,15 @@ class AbcPlatform(_interface, AbcRuntimeDelegate):
         env = dict(os.environ, LC_ALL="C")
         # try:
         #    # -b: do not prepend filenames to output lines (brief mode)
-        #    output = subprocess.check_output(['file', '-b', target],
+        #    output = subprocess.check_output(['file', '-', target],
         #                                    stderr=subprocess.DEVNULL,
         #                                    env=env)
         # except (OSError, subprocess.CalledProcessError):
         #    return default
         output, _, rval = self.myrrh_os.cmd(
-            b"%(file)s -b %(target)s",
-            file=b"file",
-            target=self.myrrh_os.fsencode(target),
+            "%(file)s -b %(target)s",
+            file="file",
+            target=target,
             execute_env=env,
         )
         if not output or rval:
@@ -367,7 +332,7 @@ class AbcPlatform(_interface, AbcRuntimeDelegate):
         """
         Fall back to `uname -p`
         """
-        o, _, r = self.myrrh_os.cmd(b"%(uname)s", uname=b"uname")
+        o, _, r = self.myrrh_os.cmd("%(uname)s", uname="uname")
         if r:
             return None
         return o.strip()

@@ -1,5 +1,5 @@
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -11,13 +11,11 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def BadGzipFile(self) -> local_gzip.BadGzipFile:
-        ...
+    def BadGzipFile(self) -> local_gzip.BadGzipFile: ...
 
     @property
     @abstractmethod
-    def GzipFile(self) -> local_gzip.GzipFile:
-        ...
+    def GzipFile(self) -> local_gzip.GzipFile: ...
 
     @property
     @abstractmethod
@@ -78,16 +76,13 @@ class _interface(ABC):
         encoding=None,
         errors=None,
         newline=None,
-    ) -> local_gzip.GzipFile:
-        ...
+    ) -> local_gzip.GzipFile: ...
 
     @abstractmethod
-    def compress(self, data, compresslevel=_COMPRESS_LEVEL_BEST, *, mtime=None) -> bytes:
-        ...
+    def compress(self, data, compresslevel=_COMPRESS_LEVEL_BEST, *, mtime=None) -> bytes: ...
 
     @abstractmethod
-    def decompress(self, data) -> bytes:
-        ...
+    def decompress(self, data) -> bytes: ...
 
 
 class AbcGzip(_interface, AbcRuntimeDelegate):

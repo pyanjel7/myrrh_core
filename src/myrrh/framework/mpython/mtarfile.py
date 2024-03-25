@@ -1,7 +1,7 @@
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -13,43 +13,35 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def TarFile(self) -> local_tarfile.TarFile:
-        ...
+    def TarFile(self) -> local_tarfile.TarFile: ...
 
     @property
     @abstractmethod
-    def TarInfo(self) -> local_tarfile.TarInfo:
-        ...
+    def TarInfo(self) -> local_tarfile.TarInfo: ...
 
     @property
     @abstractmethod
-    def TarError(self) -> local_tarfile.TarError:
-        ...
+    def TarError(self) -> local_tarfile.TarError: ...
 
     @property
     @abstractmethod
-    def ReadError(self) -> local_tarfile.ReadError:
-        ...
+    def ReadError(self) -> local_tarfile.ReadError: ...
 
     @property
     @abstractmethod
-    def CompressionError(self) -> local_tarfile.CompressionError:
-        ...
+    def CompressionError(self) -> local_tarfile.CompressionError: ...
 
     @property
     @abstractmethod
-    def StreamError(self) -> local_tarfile.StreamError:
-        ...
+    def StreamError(self) -> local_tarfile.StreamError: ...
 
     @property
     @abstractmethod
-    def ExtractError(self) -> local_tarfile.ExtractError:
-        ...
+    def ExtractError(self) -> local_tarfile.ExtractError: ...
 
     @property
     @abstractmethod
-    def HeaderError(self) -> local_tarfile.HeaderError:
-        ...
+    def HeaderError(self) -> local_tarfile.HeaderError: ...
 
     @property
     @abstractmethod
@@ -132,32 +124,25 @@ class _interface(ABC):
         return self.local_tarfile.LENGTH_LINK
 
     @abstractmethod
-    def open(self, name=None, mode="r", fileobj=None, bufsize=RECORDSIZE, **kwargs) -> local_tarfile.TarFile:
-        ...
+    def open(self, name=None, mode="r", fileobj=None, bufsize=RECORDSIZE, **kwargs) -> local_tarfile.TarFile: ...
 
     @abstractmethod
-    def is_tarfile(self, name) -> bool:
-        ...
+    def is_tarfile(self, name) -> bool: ...
 
     @abstractmethod
-    def stn(s, length, encoding, errors) -> typing.Any:
-        ...
+    def stn(s, length, encoding, errors) -> typing.Any: ...
 
     @abstractmethod
-    def nts(s, encoding, errors) -> typing.Any:
-        ...
+    def nts(s, encoding, errors) -> typing.Any: ...
 
     @abstractmethod
-    def nti(s) -> typing.Any:
-        ...
+    def nti(s) -> typing.Any: ...
 
     @abstractmethod
-    def itn(n, digits=8, format=DEFAULT_FORMAT) -> typing.Any:
-        ...
+    def itn(n, digits=8, format=DEFAULT_FORMAT) -> typing.Any: ...
 
     @abstractmethod
-    def calc_chksums(buf) -> typing.Any:
-        ...
+    def calc_chksums(buf) -> typing.Any: ...
 
 
 class AbcTarFile(_interface, AbcRuntimeDelegate):

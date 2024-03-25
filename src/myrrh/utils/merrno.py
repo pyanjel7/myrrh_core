@@ -27,12 +27,12 @@ for n in errorcode:  # noqa : F405
     posix_error_mappings[os.strerror(n)] = n
 
 
-def errno_from_msgb(err, map=posix_error_mappings, encoding="utf8", errors="ignore"):
+def errno_from_msg(err, map=posix_error_mappings):
     if err:
-        error = err.rsplit(b":", 1)[-1].strip()
+        error = err.rsplit(":", 1)[-1].strip()
     else:
         return default_errorno
-    return map.get(error.decode(encoding, errors=errors), default_errorno)
+    return map.get(error, default_errorno)
 
 
 def errno_create_localized_mapping(lang):

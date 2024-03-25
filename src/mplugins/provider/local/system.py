@@ -8,14 +8,14 @@ import shutil
 
 from myrrh.utils import mshlex
 from myrrh.provider import (
-    Wiring,
-    Protocol,
-    Whence,
-    Stat,
-    IShellEService,
-    IFileSystemEService,
-    IStreamEService,
-    StatField,
+    EWiring,
+    EProtocol,
+    EWhence,
+    EStat,
+    IEShellService,
+    IEFileSystemService,
+    IEStreamService,
+    EStatField,
 )
 
 from myrrh.utils.mhandle import LightHandler
@@ -24,7 +24,6 @@ from myrrh.core.services.config import cfg_prop
 
 
 def _working_dir(cwd):
-    cwd = os.fsdecode(cwd) if isinstance(cwd, bytes) else cwd
     return None if cwd is None else os.path.expanduser("~") if len(cwd) == 0 else os.path.join(os.path.expanduser("~"), cwd) if cwd in [os.path.curdir, os.path.pardir] else cwd
 
 
@@ -45,8 +44,8 @@ _default_shell_encoding = "utf8"
 OSErrorEBADF = OSError(errno.EBADF, os.strerror(errno.EBADF))
 
 
-class Shell(IShellEService):
-    protocol = Protocol.MYRRH
+class Shell(IEShellService):
+    protocol = EProtocol.MYRRH
 
     def execute(
         self,
@@ -57,11 +56,6 @@ class Shell(IShellEService):
         extras: dict[str, typing.Any] | None = None,
     ):
         working_dir = _working_dir(working_dir)
-        if isinstance(command, list):
-            command = b" ".join(command)
-
-        command = os.fsdecode(command)
-        env = env if env is None else {os.fsdecode(k): os.fsdecode(v) for k, v in env.items()}
 
         with subprocess.Popen(
             command,
@@ -86,10 +80,6 @@ class Shell(IShellEService):
     ):
         working_dir = _working_dir(working_dir)
 
-        command = list(map(os.fsdecode, command))
-
-        env = env if env is None else {os.fsdecode(k): os.fsdecode(v) for k, v in env.items()}
-
         proc = subprocess.Popen(command, cwd=working_dir, env=env)
 
         if proc is None:
@@ -101,12 +91,12 @@ class Shell(IShellEService):
         os.kill(proc_id, sig)
 
 
-class FileSystem(IFileSystemEService):
+class FileSystem(IEFileSystemService):
     """
     EService handle all file system function
     """
 
-    protocol = Protocol.MYRRH
+    protocol = EProtocol.MYRRH
 
     def exist(self, file_path, *, extras: dict[str, typing.Any] | None = None):
         return os.path.exists(file_path)
@@ -125,10 +115,10 @@ class FileSystem(IFileSystemEService):
     def is_container(self, path, *, extras: dict[str, typing.Any] | None = None):
         return os.path.isdir(path)
 
-    def list(self, path: bytes, *, extras: dict[str, typing.Any] | None = None):
+    def list(self, path: str, *, extras: dict[str, typing.Any] | None = None):
         raise NotImplementedError
 
-    def stat(self, path: bytes, *, extras: dict | None = None) -> dict:
+    def stat(self, path: str, *, extras: dict | None = None) -> dict:
         stat = os.stat(path)
         return {
             "st_mode": stat.st_mode,
@@ -151,31 +141,31 @@ except ImportError:
     winapi = False  # type: ignore[assignment]
 
 
-class StreamPosix(IStreamEService):
-    protocol = Protocol.POSIX
+class StreamPosix(IEStreamService):
+    protocol = EProtocol.POSIX
     chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
     handler = LightHandler()
 
-    def open_file(self, path: bytes, wiring: int, *, extras: dict | None = None) -> tuple[bytes, int]:
+    def open_file(self, path: str, wiring: int, *, extras: dict | None = None) -> tuple[str, int]:
         try:
             flags = 0
             mode = 511
 
-            wiring_ = Wiring(wiring)
+            wiring_ = EWiring(wiring)
 
-            if wiring_ & Wiring.INOUT:
+            if wiring_ & EWiring.INOUT:
                 flags |= os.O_RDWR
-                if not wiring_ & Wiring.RESET:
+                if not wiring_ & EWiring.RESET:
                     flags |= os.O_APPEND
-            elif wiring_ & Wiring.IN:
+            elif wiring_ & EWiring.IN:
                 flags |= os.O_RDONLY
-            elif wiring_ & Wiring.OUT:
+            elif wiring_ & EWiring.OUT:
                 flags |= os.O_WRONLY
-                if not wiring_ & Wiring.RESET:
+                if not wiring_ & EWiring.RESET:
                     flags |= os.O_APPEND
 
-            if wiring_ & Wiring.CREATE:
+            if wiring_ & EWiring.CREATE:
                 flags |= os.O_CREAT
 
             if hasattr(os, "O_BINARY"):
@@ -185,7 +175,7 @@ class StreamPosix(IStreamEService):
                 flags = extras.get("flags", wiring)
                 mode = extras["mode"]
 
-            fd = os.open(os.fsdecode(path), flags, mode)
+            fd = os.open(path, flags, mode)
             handle = self.handler.new(path, fd, None)
 
             return path, handle
@@ -195,27 +185,27 @@ class StreamPosix(IStreamEService):
 
     def open_process(
         self,
-        path: bytes,
+        path: str,
         wiring: int,
-        args: list[bytes],
-        working_dir: bytes | None = None,
-        env: dict[bytes, bytes] | None = None,
+        args: list[str],
+        working_dir: str | None = None,
+        env: dict[str, str] | None = None,
         *,
         extras: dict | None = None,
-    ) -> tuple[bytes, int, int, int, int]:
+    ) -> tuple[str, int, int, int, int]:
         import subprocess
 
         stdin = stdout = stderr = None
         process_group = gid = gids = uid = None
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if winapi else 0  # type: ignore[attr-defined]
         umask = -1
-        wiring = Wiring(wiring)
+        wiring = EWiring(wiring)
 
-        if wiring & Wiring.IN:
+        if wiring & EWiring.IN:
             stdin = subprocess.PIPE
-        if wiring & Wiring.OUT:
+        if wiring & EWiring.OUT:
             stdout = subprocess.PIPE
-        if wiring & Wiring.ERR:
+        if wiring & EWiring.ERR:
             stderr = subprocess.PIPE
 
         if extras:
@@ -226,9 +216,9 @@ class StreamPosix(IStreamEService):
             umask = extras.get("umask") or umask
             creationflags = extras.get("creationflags") or creationflags
 
-        env_: dict[str, str] | None = env and {os.fsencode(k): os.fsencode(v) for k, v in env.items()}  # type: ignore[assignment]
+        env: dict[str, str] | None = env
 
-        proc = subprocess.Popen(executable=path, args=args, cwd=working_dir, env=env_, stdin=stdin, stdout=stdout, stderr=stderr, creationflags=creationflags, process_group=process_group, group=gid, extra_groups=gids, user=uid, umask=umask, close_fds=False)  # type: ignore[misc]
+        proc = subprocess.Popen(executable=path, args=args, cwd=working_dir, env=env, stdin=stdin, stdout=stdout, stderr=stderr, creationflags=creationflags, process_group=process_group, group=gid, extra_groups=gids, user=uid, umask=umask, close_fds=False)  # type: ignore[misc]
 
         if proc.stdin:
             hin = self.handler.new(path, proc.stdin.fileno(), proc.stdin)
@@ -296,14 +286,14 @@ class StreamPosix(IStreamEService):
         extras: dict[str, typing.Any] | None = None,
     ) -> int:
         fd = self.handler.h(handle, 1)
-        whence = Whence(whence)
+        whence = EWhence(whence)
 
         match whence:
-            case Whence.SEEK_CUR:
+            case EWhence.SEEK_CUR:
                 whence_ = os.SEEK_CUR
-            case Whence.SEEK_SET:
+            case EWhence.SEEK_SET:
                 whence_ = os.SEEK_SET
-            case Whence.SEEK_END:
+            case EWhence.SEEK_END:
                 whence_ = os.SEEK_END
 
         return os.lseek(fd, pos, whence_)
@@ -325,20 +315,20 @@ class StreamPosix(IStreamEService):
     def stat(
         self,
         handle: int,
-        fields: int = StatField.ALL.value,
+        fields: int = EStatField.ALL.value,
         *,
         extras: dict | None = None,
     ) -> dict:
         path = self.handler.h(handle, 0)
 
-        st = Stat()
+        st = EStat()
 
         exit_status = None
         pid = None
 
-        fields = StatField(fields)
+        fields = EStatField(fields)
 
-        if fields & StatField.STATUS or fields & StatField.PID:
+        if fields & EStatField.STATUS or fields & EStatField.PID:
             try:
                 proc: subprocess.Popen = self.handler.h(handle, 2)
 
@@ -352,10 +342,10 @@ class StreamPosix(IStreamEService):
             except OSError:
                 pass
 
-        if fields & ~(StatField.STATUS | StatField.PID):
+        if fields & ~(EStatField.STATUS | EStatField.PID):
             st = os.stat(path)  # type: ignore[assignment]
 
-        return Stat._make(
+        return EStat._make(
             (
                 st.st_mode,
                 st.st_ino,
@@ -381,38 +371,38 @@ class StreamPosix(IStreamEService):
 
 if winapi:
 
-    class StreamWinAPi(IStreamEService):
-        protocol = Protocol.WINAPI
+    class StreamWinAPi(IEStreamService):
+        protocol = EProtocol.WINAPI
         chunk_sz: int = cfg_prop("rd_chunk_size", 2048, section="mplugins.provider.local")  # type: ignore[assignment]
 
         handles: dict[int, typing.Any] = dict()
 
-        def _h(self, handle) -> tuple[bytes, int]:
+        def _h(self, handle) -> tuple[str, int]:
             info = self.handles[handle]
             if info is None:
                 raise OSErrorEBADF
 
             return handle, *info
 
-        def open_file(self, path: bytes, wiring: int, *, extras: dict | None = None) -> tuple[bytes, int]:
+        def open_file(self, path: str, wiring: int, *, extras: dict | None = None) -> tuple[str, int]:
             extras = extras or dict()
-            wiring = Wiring(wiring)
+            wiring = EWiring(wiring)
 
             desired_access = 0
             create_disposition = 3  # open existing
             file_attributes = 0x80  # FILE_ATTRIBUTE_NORMAL
             template_file = 0  # no template
 
-            if wiring & Wiring.IN:
+            if wiring & EWiring.IN:
                 desired_access |= winapi.GENERIC_READ  # type: ignore[attr-defined]
-            if wiring & Wiring.OUT:
+            if wiring & EWiring.OUT:
                 desired_access |= winapi.GENERIC_READ  # type: ignore[attr-defined]
-            if wiring & Wiring.CREATE:
-                if wiring & Wiring.RESET:
+            if wiring & EWiring.CREATE:
+                if wiring & EWiring.RESET:
                     create_disposition = 2  # create always
                 else:
                     create_disposition = 1  # create new
-            path = os.fsdecode(path)
+
             handle = winapi.CreateFile(  # type: ignore[attr-defined]
                 path,
                 extras.get("desired_access", desired_access),
@@ -425,26 +415,24 @@ if winapi:
 
             self.handles[handle] = (path, None)
 
-            return os.fsencode(path), handle
+            return path, handle
 
         def open_process(
             self,
-            path: bytes,
+            path: str,
             wiring: int,
-            args: list[bytes],
-            working_dir: bytes | None = None,
-            env: dict[bytes, bytes] | None = None,
+            args: list[str],
+            working_dir: str | None = None,
+            env: dict[str, str] | None = None,
             *,
             extras: dict | None = None,
-        ) -> tuple[bytes, int, int | None, int | None, int | None]:
-            args = mshlex.list2cmdlineb(args)
-            args = os.fsdecode(args)
-            wiring = Wiring(wiring)
+        ) -> tuple[str, int, int | None, int | None, int | None]:
+            args = mshlex.list2cmdline(args)
+            wiring = EWiring(wiring)
 
             extras = extras or {}
 
             working_dir = _working_dir(working_dir)
-            env = env if env is None else {os.fsdecode(k): os.fsdecode(v) for k, v in env.items()}
 
             creation_flags = extras.get("creation_flags", 0)
 
@@ -452,21 +440,21 @@ if winapi:
             stdin_proc = stdout_proc = stderr_proc = None
             toclose = list()
             tokeep = list()
-            if wiring & Wiring.IN:
+            if wiring & EWiring.IN:
                 stdin_r, stdin_w = winapi.CreatePipe(None, 0)  # type: ignore[attr-defined]
                 toclose.append(stdin_r)
                 tokeep.append(stdin_w)
                 stdin_proc = winapi.DuplicateHandle(winapi.GetCurrentProcess(), stdin_r, winapi.GetCurrentProcess(), 0, 1, winapi.DUPLICATE_SAME_ACCESS)  # type: ignore
                 toclose.append(stdin_proc)
 
-            if wiring & Wiring.OUT:
+            if wiring & EWiring.OUT:
                 stdout_r, stdout_w = winapi.CreatePipe(None, 0)  # type: ignore[attr-defined]
                 toclose.append(stdout_w)
                 tokeep.append(stdout_r)
                 stdout_proc = winapi.DuplicateHandle(winapi.GetCurrentProcess(), stdout_w, winapi.GetCurrentProcess(), 0, 1, winapi.DUPLICATE_SAME_ACCESS)  # type: ignore
                 toclose.append(stdout_proc)
 
-            if wiring & Wiring.ERR:
+            if wiring & EWiring.ERR:
                 stderr_r, stderr_w = winapi.CreatePipe(None, 0)  # type: ignore[attr-defined]
                 toclose.append(stderr_w)
                 tokeep.append(stderr_r)
@@ -477,10 +465,10 @@ if winapi:
                 dwFlags=extras.get("startup_info.flags", 0 if not wiring else winapi.STARTF_USESTDHANDLES), hStdInput=stdin_proc, hStdOutput=stdout_proc, hStdError=stderr_proc, lpAttributeList={"handle_list": []}, wShowWindow=extras.get("startup_info.show_window", 0)  # type: ignore[attr-defined]
             )
 
-            env_ = env and {os.fsdecode(k): os.fsdecode(v) for k, v in env.items()} or dict()
+            env
 
             try:
-                hp, ht, pid, _tid = winapi.CreateProcess(None, args, None, None, int(wiring.value != 0), creation_flags, env_, working_dir, startup_info)  # type: ignore
+                hp, ht, pid, _tid = winapi.CreateProcess(None, args, None, None, int(wiring.value != 0), creation_flags, env, working_dir, startup_info)  # type: ignore
 
                 winapi.CloseHandle(ht)  # type: ignore[attr-defined]
 
@@ -569,14 +557,14 @@ if winapi:
             extras: dict[str, typing.Any] | None = None,
         ) -> int:
             handle, _, _ = self._h(handle)  # type: ignore[misc]
-            whence = Whence(whence)
+            whence = EWhence(whence)
 
             match whence:
-                case Whence.SEEK_CUR:
+                case EWhence.SEEK_CUR:
                     whence_ = os.SEEK_CUR
-                case Whence.SEEK_SET:
+                case EWhence.SEEK_SET:
                     whence_ = os.SEEK_SET
-                case Whence.SEEK_END:
+                case EWhence.SEEK_END:
                     whence_ = os.SEEK_END
 
             fd = msvcrt.open_osfhandle(handle, os.O_RDONLY)  # type: ignore[attr-defined]
@@ -586,26 +574,26 @@ if winapi:
         def stat(
             self,
             handle: int,
-            fields: int = StatField.ALL.value,
+            fields: int = EStatField.ALL.value,
             *,
             extras: dict | None = None,
         ) -> dict:
-            st = Stat()
+            st = EStat()
             exit_status = None
-            fields = StatField(fields)
+            fields = EStatField(fields)
 
             handle, path, pid = self._h(handle)  # type: ignore[misc]
 
-            if fields & ~(StatField.STATUS | StatField.PID):
+            if fields & ~(EStatField.STATUS | EStatField.PID):
                 st = os.stat(path)  # type: ignore[assignment]
                 exit_status = None
 
-            if pid and fields & StatField.STATUS:
+            if pid and fields & EStatField.STATUS:
                 exit_code = winapi.GetExitCodeProcess(handle)  # type: ignore[attr-defined]
                 if exit_code != winapi.STILL_ACTIVE:  # type: ignore[attr-defined]
                     exit_status = exit_code
 
-            return Stat._make(
+            return EStat._make(
                 (
                     st.st_mode,
                     st.st_ino,
@@ -630,8 +618,7 @@ if winapi:
                 if winapi.GetExitCodeProcess(handle) == winapi.STILL_ACTIVE:  # type: ignore[attr-defined]
                     raise
 
-    class StreamSystemAPI(StreamWinAPi):
-        ...
+    class StreamSystemAPI(StreamWinAPi): ...
 
 else:
 
@@ -640,4 +627,4 @@ else:
 
 
 class Stream(StreamPosix):
-    protocol = Protocol.MYRRH
+    protocol = EProtocol.MYRRH

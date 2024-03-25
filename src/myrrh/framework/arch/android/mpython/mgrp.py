@@ -1,9 +1,9 @@
 import warnings
 
 
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 from collections import namedtuple
 
 from ._mosenv import OsEnv
@@ -47,7 +47,7 @@ class AbcGrp(AbcRuntime):
         raise KeyError("getgrnam(): name not found: %s" % name)
 
     def getgrall(self):
-        out, err, rval = self.myrrh_os.cmd(b"%(cat)s /system/etc/group")
+        out, err, rval = self.myrrh_os.cmd("%(cat)s /system/etc/group")
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
 
         grall = []

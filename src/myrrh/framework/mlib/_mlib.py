@@ -4,7 +4,7 @@ import threading
 import importlib
 import re
 
-from myrrh.core.objects.system import _mlib_
+from myrrh.core.system import _mlib_
 
 _lock = threading.RLock()
 
@@ -198,7 +198,7 @@ class MLibModuleFinder:
 
                     if current is not None:
                         try:
-                            arch = current.myrrh_os.cfg.system.os
+                            arch = current.myrrh_os.reg.system.os
                         except Exception:
                             ...
 

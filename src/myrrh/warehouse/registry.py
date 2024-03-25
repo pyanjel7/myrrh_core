@@ -5,12 +5,11 @@ import functools
 
 from myrrh.core.services.plugins import load_ext_group
 
-from .item import BaseItem, NoneItemType, GenericItem
-from ._system import System
-from ._id import Id
-from ._credentials import Credentials
-from ._host import Host
-from ._supply import Supply, Settings
+import myrrh.warehouse.items
+
+from .items import BaseItem, GenericItem, Settings, Supply
+
+__all__ = ["GenericItem", "ProviderSettings", "ItemRegistry", "register_warehouse", "register_provider_settings"]
 
 
 class ProviderSettings(Settings):
@@ -29,17 +28,11 @@ class ProviderSettings(Settings):
 
 
 class ItemRegistry:
-    __single__: typing.Type["ItemRegistry"] | None = None
+    __single__: type["ItemRegistry"] | None = None
 
-    warehouse_predefined_items = {
-        System._type_(): System,
-        Id._type_(): Id,
-        Credentials._type_(): Credentials,
-        Host._type_(): Host,
-        NoneItemType._type_(): NoneItemType,
-    }
+    warehouse_predefined_items = {t: getattr(myrrh.warehouse.items, t) for t in myrrh.warehouse.items.__items__ if getattr(getattr(myrrh.warehouse.items, t, None), "_type_", None)}
 
-    __warehouse_items__: dict[str, typing.Type[BaseItem]] = {}
+    __warehouse_items__: dict[str, type[BaseItem]] = {}
 
     __warehouse_items__.update(warehouse_predefined_items)
 
@@ -52,10 +45,10 @@ class ItemRegistry:
             cls.__single__ = super().__new__(cls)
         return cls.__single__
 
-    def __getattr__(self, name) -> typing.Type[BaseItem]:
+    def __getattr__(self, name) -> type[BaseItem]:
         return self.get(name)
 
-    def get(self, name) -> typing.Type[BaseItem]:
+    def get(self, name) -> type[BaseItem]:
         try:
             return self.__warehouse_items__[name]
         except KeyError:
@@ -82,7 +75,7 @@ class ItemRegistry:
         return typing.Annotated[typing.Union[*self.warehouse_predefined_items.values()], pydantic.Field(discriminator="type_")] | GenericItem  # type: ignore
 
     @property
-    def FactorySupply(self) -> typing.Type[Supply]:
+    def FactorySupply(self) -> type[Supply]:
         return Supply[self.ProviderModelT]  # type: ignore[name-defined]
 
     def warehouse_model_validate(self, *a, **kwa):

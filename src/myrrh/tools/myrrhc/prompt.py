@@ -308,10 +308,8 @@ ctrl-D to exit console
                             prev_status = 0
                         except (exceptions.Reboot, exceptions.Abort, exceptions.Exit):
                             raise
-                        except exceptions.Failure:
-                            prev_status = 1
                         except Exception:
-                            if log.level >= logging.DEBUG:
+                            if log.level <= logging.DEBUG:
                                 print_exc()
                             prev_status = 1
 

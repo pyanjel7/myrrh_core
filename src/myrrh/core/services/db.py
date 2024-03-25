@@ -2,15 +2,20 @@ import os
 import pathlib
 import json
 import typing
-import tinydb
-import tinydb.middlewares
-
+import difflib
 import hashlib
 import importlib.resources
 
-from .config import cfg_get, cfg_init
+import tinydb
+import tinydb.middlewares
 
-path = cfg_get(key="@etc@")[0]
+from tinydb import where
+
+from myrrh.core.interfaces import IERegistry
+from myrrh.core.services.config import cfg_get, cfg_init
+
+
+path = cfg_get(key="@etc@")
 path = cfg_init("dbpath", os.path.join(path, "db"), "myrrh.core.services.db")
 
 __all__ = ["myrrhdb", "reload", "flush"]
@@ -55,11 +60,25 @@ class _MyrrhStorage(tinydb.Storage):
             with importlib.resources.as_file(p) as fpath:
                 data = fpath.read_bytes()
                 document = json.loads(data)
+
+                document["@registry@"] = dict()
+                for item in document["items"]:
+                    type_ = item.get("type_")
+                    if type_:
+                        document["@registry@"][type_] = item
+
+                id_ = create_id(document["@registry@"])
+                if id_:
+                    document["@id@"] = id_
+
                 document["@file@"] = fpath.name
                 document["@md5@"] = self._hash(data)
                 document["@access@"] = access
 
-            db.table(table).insert(document)
+            doc_id = db.table(table).insert(document)
+            
+            for d in document["@registry@"].values():
+                d["@tinydb.doc_id"] = doc_id
 
         return document
 
@@ -67,7 +86,7 @@ class _MyrrhStorage(tinydb.Storage):
         db = tinydb.TinyDB(storage=tinydb.storages.MemoryStorage)
 
         try:
-            resource = importlib.resources.files(f"myrrh.resources.db.{self.db}")
+            resource = importlib.resources.files("myrrh.resources.db.warehouse")
         except ModuleNotFoundError:
             return db
 
@@ -88,18 +107,77 @@ class _MyrrhStorage(tinydb.Storage):
         return self.memory
 
 
-def reload(flush: bool = True):
+def reload(force_flush: bool = True):
     global myrrhdb
 
-    if flush:
+    if force_flush:
         flush()
 
     myrrhdb = tinydb.TinyDB(path, storage=tinydb.middlewares.CachingMiddleware(_MyrrhStorage))
+
+    myrrhdb.storage.read()
 
 
 def flush():
     if myrrhdb is not None:
         myrrhdb.storage.flush()
+
+
+def create_id(registry: dict, data: dict | None = None, type: str | None = None):
+    id_ = data if type == "id" else registry.get("id") or dict()
+    system_ = data if type == "system" else registry.get("system") or dict()
+
+    return {
+        "uuid": id_.get("uuid"),
+        "os": system_.get("os"),
+        "label": system_.get("label"),
+        "tags": [t for item in registry.values() for tags in (item.get("tags") or list()) for t in tags.split(";")],
+    }
+
+
+def search_by(name, value):
+    if value is None:
+        return []
+
+    return myrrhdb.table("emyrrh").search(where("@id@")[name] == value)
+
+
+def best_match(docs, name: str, value: str):
+
+    if not value:
+        return
+
+    value = value.lower()
+
+    seq = {}
+    for d in docs:
+        dvalue = d["@id@"].get(name)
+        if dvalue:
+            dvalue.lower()
+            seq[difflib.SequenceMatcher(None, value, dvalue).ratio()] = d
+
+    v = max(seq)
+
+    return seq[v]
+
+
+def search(registry: IERegistry, data: dict, type: str):
+
+    doc_id = registry.get_meta("@tinydb.doc_id")
+    if doc_id:
+        return myrrhdb.table("emyrrh").get(doc_id=doc_id)["@registry@"].get(type)
+
+    id_ = create_id(registry, data, type)
+
+    docs = search_by("uuid", id_["uuid"])
+    if docs:
+        return docs[0]['@registry@'].get(type)
+
+    docs = search_by("os", id_["os"])
+
+    if docs:
+        doc = best_match(docs, "label", id_["label"])
+        return doc['@registry@'].get(type)
 
 
 myrrhdb = None

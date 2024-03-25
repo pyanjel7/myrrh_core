@@ -2,8 +2,7 @@ from mplugins.myrrhc.provider_ext import provider, cmd
 
 
 @provider.group()
-def local():
-    ...
+def local(): ...
 
 
 @local.command()

@@ -1,8 +1,9 @@
 """Shared OS X support functions."""
+
 import re
 
 from myrrh import PID
-from myrrh.core.objects.system import AbcRuntime, _mlib_
+from myrrh.core.system import AbcRuntime, _mlib_
 from . import mimportlib
 
 __mlib__ = "Abc_Osx_support"

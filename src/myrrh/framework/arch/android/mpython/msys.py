@@ -1,4 +1,4 @@
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 
 from myrrh.framework.mpython.msys import AbcSys
 

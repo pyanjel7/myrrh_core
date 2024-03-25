@@ -60,9 +60,9 @@ class Test_basic(unittest.TestCase):
             os.remove("test_entity_full.emyrrh")
 
     def test_which(self):
-        cmd = bmy.info("warehouse.system.shell")
+        cmd = bmy.info("warehouse.shell.path")
 
-        p = bmy.which(bmy.info("warehouse.system.shell"))
+        p = bmy.which(bmy.info("warehouse.shell.path"))
 
         try:
             p.index(cmd)

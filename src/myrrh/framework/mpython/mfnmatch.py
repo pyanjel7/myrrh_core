@@ -1,5 +1,5 @@
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 from . import mbuiltins
 
 __mlib__ = "AbcFnmatch"
@@ -9,20 +9,16 @@ class _interface(ABC):
     import fnmatch as local_fnmatch
 
     @abstractmethod
-    def filter(self, names, pat) -> list:
-        ...
+    def filter(self, names, pat) -> list: ...
 
     @abstractmethod
-    def fnmatch(self, name, pat) -> bool:
-        ...
+    def fnmatch(self, name, pat) -> bool: ...
 
     @abstractmethod
-    def fnmatchcase(self, pathname) -> bool:
-        ...
+    def fnmatchcase(self, pathname) -> bool: ...
 
     @abstractmethod
-    def translate(self, pathname) -> str:
-        ...
+    def translate(self, pathname) -> str: ...
 
 
 class AbcFnmatch(_interface, AbcRuntimeDelegate):

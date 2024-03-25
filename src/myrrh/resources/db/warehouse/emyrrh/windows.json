@@ -1,0 +1,52 @@
+{
+    "items":[ 
+        {
+            "type_" : "system",
+            "os" : "nt",
+            "label" : "Windows",
+            "eol": "\r\n",
+            "myrrhos" : "myrrh.framework.arch.nt.myrrhos"
+        },
+        {
+            "type_" : "directory",
+            "devnull": "NUL",
+            "sep": "\\",
+            "curdir": ".",
+            "pardir": "..",
+            "extsep": ".",
+            "pathsep": ";",
+            "executables": {
+                "wmic": "C:\\Windows\\System32\\wbem\\WMIC.exe",
+                "chcp": "C:\\Windows\\System32\\chcp.com",
+                "set": "set",
+                "echo": "echo",
+                "where": "C:\\Windows\\System32\\where.exe",
+                "setx": "C:\\Windows\\System32\\setx.exe",
+                "reg": "C:\\Windows\\System32\\chcp.com 65001 > NUL && C:\\Windows\\System32\\reg.exe",
+                "copy": "copy",
+                "powershell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "mklink": "mklink",
+                "cmd": "C:\\windows\\system32\\cmd.exe",
+                "ping": "C:\\Windows\\System32\\ping.exe",
+                "move": "move",
+                "dir": "dir",
+                "cd": "cd",
+                "rename": "rename",
+                "rmdir": "rmdir",
+                "robocopy": "C:\\Windows\\System32\\robocopy.exe",
+                "xcopy": "C:\\Windows\\System32\\xcopy.exe",
+                "tar": "C:\\Windows\\System32\\tar.exe",
+                "mkdir": "mkdir",
+                "cscript": "C:\\Windows\\System32\\cscript.exe"
+            }
+        },
+        {
+            "type_" : "shell",
+
+            "path" : "%(cmd)s",
+            "args": [ "/c" ],
+            "commands" : {
+            }
+        }
+    ]
+}

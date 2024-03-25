@@ -1,7 +1,7 @@
 import unittest
 import threading
 
-from myrrh.core.objects.system import Buffer
+from myrrh.core.system import Buffer
 
 
 class TestBuffer(unittest.TestCase):

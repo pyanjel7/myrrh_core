@@ -1,10 +1,10 @@
 import pprint
 import pydantic
-import typing
 import json
 
-from myrrh.warehouse.item import NoneItem
-from myrrh.core.objects.entity import Entity, CoreProvider
+from myrrh.warehouse.items import NoneItem
+from myrrh.core.objects import Entity
+
 from myrrh.provider import IProvider
 
 from myrrh.provider.registry import ProviderRegistry
@@ -51,7 +51,7 @@ class Assembly:
         return pname
 
     @classmethod
-    def fromProvider(cls, provider: typing.Type[IProvider], *, warehouse=list(), **kwargs):
+    def fromProvider(cls, provider: type[IProvider], *, warehouse=list(), **kwargs):
         supply = ItemRegistry().FactorySupply(
             paths=[f"**/{provider._name_}"],
             settings=[{"name": provider._name_, **kwargs}],
@@ -97,15 +97,13 @@ class Assembly:
 
                 self._providers.append(provider)
 
-        return CoreProvider(self._providers, patterns=self.supply.paths)
+        return self._providers
 
     def build(self) -> Entity:
         for prestep in self.supply.pre:
             pass
 
-        provider = self._new_providers()
-
-        entity = Entity(provider, self.warehouse)
+        entity = Entity(self._new_providers(), self.warehouse, patterns=self.supply.paths)
 
         for poststep in self.supply.post:
             pass
@@ -114,9 +112,9 @@ class Assembly:
 
     def fromEntity(self, entity: Entity, only_predefined=True):
         if only_predefined:
-            warehouse = entity.cfg.predefined()
+            warehouse = entity.reg.predefined()
         else:
-            warehouse = entity.cfg.values()
+            warehouse = entity.reg.values()
 
         return self.__class__(supply=self.supply, warehouse=warehouse)
 

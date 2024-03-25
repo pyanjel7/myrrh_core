@@ -1,9 +1,9 @@
 import unittest
 
-from myrrh.provider import IProvider, IShellEService, IFileSystemEService
+from myrrh.provider import IProvider, IEShellService, IEFileSystemService
 from myrrh.provider.registry import ProviderRegistry
 
-from myrrh.core.objects.entity import CoreProvider
+from myrrh.core.system import CoreProvider
 
 
 class CoreProviderTest(unittest.TestCase):
@@ -18,10 +18,10 @@ class CoreProviderTest(unittest.TestCase):
 
     def test_basic_set_default(self):
         class FakeProvider(IProvider):
-            class FakeShellServ(IShellEService):
+            class FakeShellServ(IEShellService):
                 protocol = "fake"
 
-            class FakeFilesystemServ(IFileSystemEService):
+            class FakeFilesystemServ(IEFileSystemService):
                 protocol = "fake"
 
             def services(self):
@@ -30,8 +30,7 @@ class CoreProviderTest(unittest.TestCase):
             def catalog(self):
                 return tuple()
 
-            def deliver(self, name):
-                ...
+            def deliver(self, name): ...
 
         ProviderRegistry()._new_provider("fake", FakeProvider)
         p_local = ProviderRegistry().get("local")()

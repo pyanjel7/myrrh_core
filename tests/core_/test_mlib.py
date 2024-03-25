@@ -42,8 +42,8 @@ class BasicTest(_MLibTest):
             from mlib.py import os as os2
 
         self.assertIsNot(os1, os2)
-        self.assertEqual(os1.myrrh_os.cfg.id, self.e1.cfg.id)
-        self.assertEqual(os2.myrrh_os.cfg.id, self.e2.cfg.id)
+        self.assertEqual(os1.myrrh_os.reg.id, self.e1.reg.id)
+        self.assertEqual(os2.myrrh_os.reg.id, self.e2.reg.id)
 
         from mlib.py import os
 
@@ -62,8 +62,8 @@ class BasicTest(_MLibTest):
                 from mlib.py import os as os2
 
         self.assertIsNot(os1, os2)
-        self.assertEqual(os1.myrrh_os.cfg.id, self.e1.cfg.id)
-        self.assertEqual(os2.myrrh_os.cfg.id, self.e2.cfg.id)
+        self.assertEqual(os1.myrrh_os.reg.id, self.e1.reg.id)
+        self.assertEqual(os2.myrrh_os.reg.id, self.e2.reg.id)
 
         from mlib.py import os
 
@@ -78,19 +78,19 @@ class BasicTest(_MLibTest):
 class TestWrappedModule(_MLibTest):
     def validate(self, os1, os2, osh1, osh2):
         self.assertIsNot(os1, os2)
-        self.assertEqual(os1.myrrh_os.cfg.id, self.e1.cfg.id)
-        self.assertEqual(os2.myrrh_os.cfg.id, self.e2.cfg.id)
+        self.assertEqual(os1.myrrh_os.reg.id, self.e1.reg.id)
+        self.assertEqual(os2.myrrh_os.reg.id, self.e2.reg.id)
 
         self.assertIsNot(self.e1, self.e2)
         self.assertIsNot(osh1, osh2)
 
-        self.assertNotEqual(self.e1.cfg.id, self.e2.cfg.id)
-        self.assertEqual(osh1.myrrh_os.cfg.id, self.e1.cfg.id)
-        self.assertEqual(osh2.myrrh_os.cfg.id, self.e2.cfg.id)
+        self.assertNotEqual(self.e1.reg.id, self.e2.reg.id)
+        self.assertEqual(osh1.myrrh_os.reg.id, self.e1.reg.id)
+        self.assertEqual(osh2.myrrh_os.reg.id, self.e2.reg.id)
 
         self.assertIsNot(osh1._mod, osh2._mod)
-        self.assertEqual(osh1._mod.os.myrrh_os.cfg.id, self.e1.cfg.id)
-        self.assertEqual(osh2._mod.os.myrrh_os.cfg.id, self.e2.cfg.id)
+        self.assertEqual(osh1._mod.os.myrrh_os.reg.id, self.e1.reg.id)
+        self.assertEqual(osh2._mod.os.myrrh_os.reg.id, self.e2.reg.id)
 
         cwd1 = os1.getcwd()
         cwd2 = os2.getcwd()
@@ -127,11 +127,11 @@ class TestWrappedModule(_MLibTest):
 
 class TestThreaded(_MLibTest):
     def validate(self, os1, osh1, e):
-        self.assertEqual(os1.myrrh_os.cfg.id, e.cfg.id)
+        self.assertEqual(os1.myrrh_os.reg.id, e.reg.id)
 
-        self.assertEqual(osh1.myrrh_os.cfg.id, e.cfg.id)
+        self.assertEqual(osh1.myrrh_os.reg.id, e.reg.id)
 
-        self.assertEqual(osh1._mod.os.myrrh_os.cfg.id, e.cfg.id)
+        self.assertEqual(osh1._mod.os.myrrh_os.reg.id, e.reg.id)
 
         cwd1 = os1.getcwd()
 

@@ -1,8 +1,8 @@
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 from ._mosenv import OsEnv
 
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 from collections import namedtuple
 
 __mlib__ = "AbcPwd"

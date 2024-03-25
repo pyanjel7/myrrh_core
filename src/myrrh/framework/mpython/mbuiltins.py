@@ -3,7 +3,7 @@ __mlib__ = "AbcBuiltins"
 import typing
 import functools
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 
 from . import mimportlib
 

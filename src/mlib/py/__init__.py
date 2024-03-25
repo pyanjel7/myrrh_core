@@ -18,8 +18,7 @@ from myrrh.framework.mpython._mosprocess import AbcOsProcess
 from myrrh.framework.mpython.mos import AbcOs
 
 
-class Os(AbcOsEnv, AbcOsFs, AbcOsFile, AbcOsProcess, AbcOs):
-    ...
+class Os(AbcOsEnv, AbcOsFs, AbcOsFile, AbcOsProcess, AbcOs): ...
 
 
 os: Os

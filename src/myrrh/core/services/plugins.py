@@ -43,14 +43,14 @@ class PluginSrv:
 
         if extension in cfg_get("@loaded_extensions@"):  # type: ignore[operator]
             return
-        
+
         group, ext_value, ext_kind = self._extension_partition(extension)
         if kind and ext_kind != kind:
             return
-        
+
         if extension in cfg_get("@failed_extensions@"):  # type: ignore[operator, uniion-attr]
             cfg_get("@failed_extensions@").remove(extension)  # type: ignore[union-attr]
-        
+
         try:
             callable = importlib.metadata.EntryPoint(ext_value, f"{group}:{ext_kind}", group).load()
             callable(*ext_value.split("-"))

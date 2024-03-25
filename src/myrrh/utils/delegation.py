@@ -166,18 +166,16 @@ class ABCDelegationMeta(ABCMeta):
 
 
 class ABCDelegation(metaclass=ABCDelegationMeta):
-    __delegated__: tuple[typing.Any, ...] | typing.Dict[typing.Type[ABC], typing.Any] | None = None
+    __delegated__: tuple[typing.Any, ...] | typing.Dict[type[ABC], typing.Any] | None = None
     __delegate_all__: tuple[typing.Any, ...]
     __delegate_check_type__: bool
 
     @property
     @abstractmethod
-    def _delegate_(self) -> typing.Any:
-        ...
+    def _delegate_(self) -> typing.Any: ...
 
     @abstractmethod
-    def __delegate__(self, t: typing.Type[ABC], o: object) -> None:
-        ...
+    def __delegate__(self, t: type[ABC], o: object) -> None: ...
 
 
 def NoneDelegation(name, delegation_class):

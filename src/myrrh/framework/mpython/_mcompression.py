@@ -1,5 +1,5 @@
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -11,13 +11,11 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def BaseStream(self) -> local__compression.BaseStream:
-        ...
+    def BaseStream(self) -> local__compression.BaseStream: ...
 
     @property
     @abstractmethod
-    def DecompressReader(self) -> local__compression.DecompressReader:
-        ...
+    def DecompressReader(self) -> local__compression.DecompressReader: ...
 
     @property
     @abstractmethod

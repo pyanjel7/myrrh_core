@@ -1,208 +1,137 @@
 import abc
 import threading
-import typing
-import pydantic
-import pydantic.types
-import datetime
 
-from ...provider import (
-    IShellEService,
-    IFileSystemEService,
-    IStreamEService,
-    IStateEService,
-    ISnapEService,
-    IInstanceEService,
-    Protocol,
+from .ieregistry import IERegistrySupplier
+
+from .ieservices import (
+    IEShellService,
+    IEFileSystemService,
+    IEStreamService,
+    IEStateService,
+    IESnapService,
+    IEInstanceService,
+    IEWarehouseService,
+    EProtocol,
     IEService,
 )
 
+
 __all__ = [
     "IEServiceGroup",
-    "IRegistry",
     "IEServiceGroup",
-    "ISystem",
-    "IHost",
-    "IVendor",
+    "IESystem",
+    "IEHost",
+    "IEVendor",
     "IEntity",
-    "ICoreEService",
-    "ICoreStreamEService",
-    "ICoreShellEService",
-    "ICoreFileSystemEService",
-    "ICoreStateEService",
-    "ICoreSnapEService",
-    "ICoreInstanceEService",
-    "Protocol",
+    "IECoreService",
+    "IECoreStreamService",
+    "IECoreShellService",
+    "IECoreFileSystemService",
+    "IECoreStateService",
+    "IECoreSnapService",
+    "IECoreInstanceService",
+    "EProtocol",
 ]
 
 
-class IBaseItem(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def DOM(self) -> pydantic.types.PastDatetime | None:
-        return None
-
-    @property
-    @abc.abstractmethod
-    def SLL(self) -> datetime.timedelta | None:
-        return None
-
-    @property
-    @abc.abstractmethod
-    def UBD(self) -> datetime.datetime | None:
-        return None
-
-    @property
-    @abc.abstractmethod
-    def UTC(self) -> bool | None:
-        return None
-
-    @abc.abstractmethod
-    def now(self):
-        ...
-
-    @abc.abstractmethod
-    def __bool__(self):
-        ...
-
-
-class ICoreEService(IEService):
+class IECoreService(IEService):
     @classmethod
     @abc.abstractmethod
-    def eref(cls) -> str:
-        ...
+    def eref(cls) -> str: ...
 
 
-class ICoreStreamEService(IStreamEService, ICoreEService):
-    __delegate_all__ = (IStreamEService, ICoreEService)
+class IECoreStreamService(IEStreamService, IECoreService):
+    __delegate_all__ = (IEStreamService, IECoreService)
 
 
-class ICoreFileSystemEService(IFileSystemEService, ICoreEService):
-    __delegate_all__ = (IFileSystemEService, ICoreEService)
+class IECoreFileSystemService(IEFileSystemService, IECoreService):
+    __delegate_all__ = (IEFileSystemService, IECoreService)
 
 
-class ICoreShellEService(IShellEService, ICoreEService):
-    __delegate_all__ = (IShellEService, ICoreEService)
+class IECoreShellService(IEShellService, IECoreService):
+    __delegate_all__ = (IEShellService, IECoreService)
 
 
-class ICoreStateEService(IStateEService, ICoreEService):
-    __delegate_all__ = (IStateEService, ICoreEService)
+class IECoreStateService(IEStateService, IECoreService):
+    __delegate_all__ = (IEStateService, IECoreService)
 
 
-class ICoreSnapEService(ISnapEService, ICoreEService):
-    __delegate_all__ = (ISnapEService, ICoreEService)
+class IECoreSnapService(IESnapService, IECoreService):
+    __delegate_all__ = (IESnapService, IECoreService)
 
 
-class ICoreInstanceEService(IInstanceEService, ICoreEService):
-    __delegate_all__ = (IInstanceEService, ICoreEService)
+class IECoreInstanceService(IEInstanceService, IECoreService):
+    __delegate_all__ = (IEInstanceService, IECoreService)
 
 
-class IRegistry(dict, abc.ABC):
-    @abc.abstractmethod
-    def __getattr__(self, name) -> typing.Any:
-        ...
-
-    @abc.abstractmethod
-    def predefined(self) -> list[typing.Any]:
-        ...
-
-    @abc.abstractmethod
-    def defined_values(self) -> list[typing.Any]:
-        ...
-
-    @abc.abstractmethod
-    def append(self, item: IBaseItem, mode: typing.Literal["keep", "update", "replace"]):
-        ...
-
-
-class IEServiceGroup(abc.ABC):
+class IEServiceGroup(IERegistrySupplier, abc.ABC):
     @property
     @abc.abstractmethod
-    def services(self) -> dict[str, typing.Type[ICoreEService]]:
-        ...
+    def services(self) -> dict[str, type[IECoreService]]: ...
 
     @property
     @abc.abstractmethod
-    def cfg(self) -> IRegistry:
-        ...
+    def lock(self) -> threading.RLock: ...
+
+
+class IESystem(IEServiceGroup):
+    @property
+    @abc.abstractmethod
+    def shell(self) -> IECoreShellService: ...
 
     @property
     @abc.abstractmethod
-    def lock(self) -> threading.RLock:
-        ...
-
-
-class ISystem(IEServiceGroup):
-    @property
-    @abc.abstractmethod
-    def shell(self) -> ICoreShellEService:
-        ...
+    def fs(self) -> IECoreFileSystemService: ...
 
     @property
     @abc.abstractmethod
-    def fs(self) -> ICoreFileSystemEService:
-        ...
+    def stream(self) -> IECoreStreamService: ...
+
+    @abc.abstractmethod
+    def Stream(self, protocol: str | EProtocol | None = None) -> IECoreStreamService: ...
+
+    @abc.abstractmethod
+    def Fs(self, protocol: str | EProtocol | None = None) -> IECoreFileSystemService: ...
+
+    @abc.abstractmethod
+    def Shell(self, protocol: str | EProtocol | None = None) -> IECoreShellService: ...
+
+
+class IEHost(IEServiceGroup):
+    @property
+    @abc.abstractmethod
+    def state(self) -> IECoreStateService: ...
 
     @property
     @abc.abstractmethod
-    def stream(self) -> ICoreStreamEService:
-        ...
-
-    @abc.abstractmethod
-    def Stream(self, protocol: str | Protocol | None = None) -> ICoreStreamEService:
-        ...
-
-    @abc.abstractmethod
-    def Fs(self, protocol: str | Protocol | None = None) -> ICoreFileSystemEService:
-        ...
-
-    @abc.abstractmethod
-    def Shell(self, protocol: str | Protocol | None = None) -> ICoreShellEService:
-        ...
-
-
-class IHost(IEServiceGroup):
-    @property
-    @abc.abstractmethod
-    def state(self) -> ICoreStateEService:
-        ...
+    def snap(self) -> IECoreSnapService: ...
 
     @property
     @abc.abstractmethod
-    def snap(self) -> ICoreSnapEService:
-        ...
+    def inst(self) -> IECoreInstanceService: ...
+
+
+class IEVendor(IEServiceGroup):
 
     @property
     @abc.abstractmethod
-    def inst(self) -> ICoreInstanceEService:
-        ...
+    def warehouse(self) -> IEWarehouseService: ...
 
 
-class IVendor(IEServiceGroup):
-    ...
-
-
-class IEntity:
-    @property
-    @abc.abstractmethod
-    def system(self) -> ISystem:
-        ...
+class IEntity(IERegistrySupplier):
 
     @property
     @abc.abstractmethod
-    def host(self) -> IHost:
-        ...
+    def system(self) -> IESystem: ...
 
     @property
     @abc.abstractmethod
-    def vendor(self) -> IVendor:
-        ...
+    def host(self) -> IEHost: ...
 
     @property
     @abc.abstractmethod
-    def cfg(self) -> IRegistry:
-        ...
+    def vendor(self) -> IEVendor: ...
 
     @property
     @abc.abstractmethod
-    def eid(self) -> str:
-        ...
+    def eid(self) -> str: ...

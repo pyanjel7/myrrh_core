@@ -1,4 +1,4 @@
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 
 
 class Ansimap(AbcRuntime):

@@ -1,4 +1,4 @@
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 
 from myrrh.framework.mpython.msys import AbcSys
 
@@ -20,7 +20,7 @@ class Sys(AbcSys):
                 b"python3",
                 b"python",
             ):
-                self.__executable, err, rval = self.myrrh_os.cmdb(b"%(which)s %(exe)s", exe=exe)
+                self.__executable, err, rval = self.myrrh_os.cmdb("%(which)s %(exe)s", exe=exe)
                 if rval == 0:
                     break
             else:

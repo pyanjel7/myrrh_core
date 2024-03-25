@@ -5,10 +5,11 @@
 -------------------------
 """
 import os
-from myrrh.utils.mstring import typestr
+
+from myrrh.utils import mstring
 
 from myrrh.utils.delegation import abstractmethod
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 
 __mlib__ = "AbcOsEnv"
 
@@ -43,7 +44,7 @@ class AbcOsEnv(AbcRuntime):
 
     @property
     def linesep(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.linesepb)
+        return self.myrrh_os.linesep
 
     @property
     def environ(self):
@@ -51,83 +52,72 @@ class AbcOsEnv(AbcRuntime):
 
     @environ.setter
     def environ(self, env):
-        return self.myrrh_os.setenvb(env)
+        return self.myrrh_os.setenv(env)
 
     @property
     def environb(self):
-        return self.myrrh_os.getenvb()
+        return mstring.encode(self.myrrh_os.getenv(), self.myrrh_os.fsencoding, self.myrrh_os.fsencodeerrors)
 
     @environb.setter
     def environb(self, env):
-        return self.myrrh_os.setenvb(env)
+        return self.myrrh_os.setenv(mstring.decode(env))
 
     @property
     @abstractmethod
-    def name(self):
-        ...
+    def name(self): ...
 
-    def getenv(self, key, default=None):
+    def getenv(self, key, default: str | None = None) -> str | None:
         try:
             return self.environ[key]
         except KeyError:
-            return self.myrrh_os.fsdecode(default)
+            return default
 
-    def getenvb(self, key, default=None):
+    def getenvb(self, key, default: bytes | None = None) -> bytes | None:
         try:
             return self.environb[key]
         except KeyError:
-            return self.myrrh_os.fsencode(default)
+            return default
 
     def get_exec_path(self, env=None):
-        if env and env.get(b"PATH") and env.get("PATH"):
-            raise ValueError("env cannot contain 'PATH' and b'PATH' keys")
+        if env and env.get("PATH") and env.get("PATH"):
+            raise ValueError("env cannot contain 'PATH' and 'PATH' keys")
 
         if env is None:
-            env = self.myrrh_os.getenvb()
+            env = self.myrrh_os.getenv()
 
-        paths = env.get("PATH", env.get(b"PATH", self.myrrh_os.defpathb))
+        paths = env.get("PATH", env.get("PATH", self.myrrh_os.defpathb))
 
-        return typestr(self.myrrh_os.fsencoding)([p for p in paths.split(self.myrrh_os.pathsepb)])
-
-    @abstractmethod
-    def putenv(self, key, value):
-        ...
+        return mstring.typestr(self.myrrh_os.fsencoding)([p for p in paths.split(self.myrrh_os.pathsep)])
 
     @abstractmethod
-    def unsetenv(self, key):
-        ...
+    def putenv(self, key, value): ...
 
     @abstractmethod
-    def gethome(self):
-        ...
+    def unsetenv(self, key): ...
 
     @abstractmethod
-    def gettemp(self):
-        ...
+    def gethome(self): ...
 
     @abstractmethod
-    def getlogin(self):
-        ...
+    def gettemp(self): ...
 
     @abstractmethod
-    def geteuid(self):
-        ...
+    def getlogin(self): ...
 
     @abstractmethod
-    def getegid(self):
-        ...
+    def geteuid(self): ...
 
     @abstractmethod
-    def getuid(self):
-        ...
+    def getegid(self): ...
 
     @abstractmethod
-    def getgid(self):
-        ...
+    def getuid(self): ...
 
     @abstractmethod
-    def getgroups(self):
-        ...
+    def getgid(self): ...
+
+    @abstractmethod
+    def getgroups(self): ...
 
     def device_encoding(self, fd):
         # fd connected to a terminal unsupported => always None
@@ -136,5 +126,4 @@ class AbcOsEnv(AbcRuntime):
     # Miscellaneous System Information
 
     @abstractmethod
-    def cpu_count(self):
-        ...
+    def cpu_count(self): ...

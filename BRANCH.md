@@ -13,4 +13,10 @@ Dashboard
   - add a setup step to the providers
   - better doc ?
   - add some fixes to 0.1
-  ...
+  
+  - define API for db
+
+Dev status
+
+- core services pluggable: ok
+- create a database service containing pre-defined information about entity items: work in progress

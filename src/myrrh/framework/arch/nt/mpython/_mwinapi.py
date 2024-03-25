@@ -4,7 +4,7 @@ import typing
 from concurrent.futures import CancelledError
 
 from myrrh import PID
-from myrrh.core.objects.system import AbcRuntime, Protocol
+from myrrh.core.system import AbcRuntime, EProtocol
 from myrrh.utils import mshlex
 
 
@@ -191,10 +191,10 @@ class AbcWinAPI(AbcRuntime):
             wiring |= self.myrrh_syscall.Wiring.OUT
 
         return self.myrrh_syscall.open_file(
-            self.myrrh_os.fsencode(__file_name),
+            __file_name,
             wiring,
             extras=extras,
-            protocol=Protocol.WINAPI,
+            protocol=EProtocol.WINAPI,
         )
 
     def ConnectNamedPipe(self, handle: int, overlapped=True):
@@ -224,7 +224,7 @@ class AbcWinAPI(AbcRuntime):
     def CreateProcess(
         self,
         __application_name: str | None,
-        __command_line: str | None,
+        __command_line: str,
         __proc_attrs: typing.Any,
         __thread_attrs: typing.Any,
         __inherit_handles: bool,
@@ -241,9 +241,7 @@ class AbcWinAPI(AbcRuntime):
             __application_name = args[0]
 
         path = self.myrrh_os.p(__application_name)
-        args = [self.myrrh_os.fsencode(arg) for arg in args]
         working_dir = self.myrrh_os.p(__current_directory) if __current_directory else None
-        env = {self.myrrh_os.fsencode(k): self.myrrh_os.fsencode(v) for k, v in __env_mapping.items()} if __env_mapping else None
 
         stdin = __startup_info.hStdInput
         stdout = __startup_info.hStdOutput
@@ -253,7 +251,7 @@ class AbcWinAPI(AbcRuntime):
             path,
             args,
             working_dir,
-            env,
+            __env_mapping,
             stdin,
             stdout,
             stderr,
@@ -263,7 +261,7 @@ class AbcWinAPI(AbcRuntime):
                 "startup_info.flags": __startup_info.dwFlags,
                 "startup_info.show_windows": __startup_info.wShowWindow,
             },
-            protocol=Protocol.WINAPI,
+            protocol=EProtocol.WINAPI,
         )
 
         handle = self.myrrh_syscall.gethandle(hproc, True)

@@ -1,5 +1,5 @@
 from myrrh.utils.delegation import abstractmethod
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 __mlib__ = "Abc_Locale"
 
@@ -80,12 +80,10 @@ class Abc_Locale(AbcRuntimeDelegate):
         return self.myrrh_os.defaultencoding()
 
     @abstractmethod
-    def setlocale(self, category, value=None):
-        ...
+    def setlocale(self, category, value=None): ...
 
     @abstractmethod
-    def localeconv(self, category, value=None):
-        ...
+    def localeconv(self, category, value=None): ...
 
     # optionals
     # def strcoll(self):

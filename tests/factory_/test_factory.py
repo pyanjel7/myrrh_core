@@ -16,8 +16,8 @@ class AssemblyTest(unittest.TestCase):
         f_from_e = f.fromEntity(e, only_predefined=False)
 
         self.assertEqual(f.supply, f_from_e.supply)
-        self.assertEqual(e.cfg.system, f_from_e.get_item("system"))
-        self.assertEqual(e.cfg.id, f_from_e.get_item("id"))
+        self.assertEqual(e.reg.system, f_from_e.get_item("system"))
+        self.assertEqual(e.reg.id, f_from_e.get_item("id"))
 
     def test_basic_build_local_with_predefined(self):
         f = Assembly(
@@ -28,9 +28,9 @@ class AssemblyTest(unittest.TestCase):
         f_from_e = f.fromEntity(e, only_predefined=False)
 
         self.assertEqual(f.supply, f_from_e.supply)
-        self.assertEqual(e.cfg.system, f_from_e.get_item("system"))
-        self.assertEqual(e.cfg.system.label, "mylabel")
-        self.assertEqual(e.cfg.id, f_from_e.get_item("id"))
+        self.assertEqual(e.reg.system, f_from_e.get_item("system"))
+        self.assertEqual(e.reg.system.label, "mylabel")
+        self.assertEqual(e.reg.id, f_from_e.get_item("id"))
 
     def test_basic_settings_raw(self):
         c = Assembly.fromRaw(
@@ -104,7 +104,7 @@ class ItemsBasicTests(unittest.TestCase):
 
 class RegisterBasicTests(unittest.TestCase):
     def test_basic_register_item(self):
-        from myrrh.warehouse.item import BaseItem
+        from myrrh.warehouse.items import BaseItem
 
         class PluginItem(BaseItem[typing.Literal["pluggin"]]):
             type_: typing.Literal["pluggin"]
@@ -119,9 +119,9 @@ class RegisterBasicTests(unittest.TestCase):
         self.assertIn("pluggin", ItemRegistry().items)
 
     def test_basic_register_provider_model(self):
-        import myrrh.warehouse
+        import myrrh.warehouse.items
 
-        class NewProviderModel(myrrh.warehouse.Settings):
+        class NewProviderModel(myrrh.warehouse.items.Settings):
             name: typing.Literal["new_provider"]
             usable: bool = False
 

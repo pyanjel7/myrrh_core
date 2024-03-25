@@ -3,24 +3,10 @@
 
 -----------------
 """
+
 import pathlib
 import re
-
-
-def str2intb(bytes, default=None):
-    if isinstance(bytes, int):
-        return bytes
-
-    bytes = bytes and bytes.strip()
-
-    if not bytes:
-        return default
-
-    try:
-        int_bytes = bytes if len(bytes) > 0 and bytes[0] != b"0" or bytes.startswith(b"0x") else b"0x%s" % bytes
-        return int(int_bytes, 0)
-    except ValueError:
-        return bytes if default is None else default
+import typing
 
 
 def str2int(str, default=None):
@@ -164,47 +150,109 @@ def bytestohostport(host, port=None):
     return (host, port)
 
 
-def encode(value, encoding: str = "utf8", encode_errors: str = "strict") -> bytes | list[bytes] | dict[bytes, bytes]:
+def encode(value, encoding: str = "utf8", errors: str = "strict") -> bytes | list[bytes] | dict[bytes, bytes]:
     if isinstance(value, bytes):
         return value
 
     if isinstance(value, (list, tuple)):
-        return [encode(s, encoding, encode_errors) for s in value]  # type: ignore[misc]
+        return [encode(s, encoding, errors) for s in value]  # type: ignore[misc]
 
     if isinstance(value, dict):
-        return {encode(k, encoding, encode_errors): encode(v, encoding, encode_errors) for k, v in value.items()}  # type: ignore[misc]
+        return {encode(k, encoding, errors): encode(v, encoding, errors) for k, v in value.items()}  # type: ignore[misc]
 
     if isinstance(value, str):
-        return value.encode(encoding or "utf8", errors=encode_errors)
+        return value.encode(encoding, errors=errors)
 
     return value
 
 
-def decode(value, encoding: str = "utf8", encode_errors: str = "strict") -> str | list[str] | dict[str, str]:
+def decode(value, encoding: str = "utf8", errors: str = "strict") -> str | list[str] | dict[str, str]:
     if isinstance(value, str):
         return value
 
     if isinstance(value, (list, tuple)):
-        return [decode(b, encoding, encode_errors) for b in value]  # type: ignore[misc]
+        return [decode(b, encoding, errors) for b in value]  # type: ignore[misc]
 
     if isinstance(value, dict):
-        return {decode(k, encoding, encode_errors): decode(v, encoding, encode_errors) for k, v in value.items()}  # type: ignore[misc]
+        return {decode(k, encoding, errors): decode(v, encoding, errors) for k, v in value.items()}  # type: ignore[misc]
 
     if isinstance(value, bytes):
-        return value.decode(encoding or "utf8", errors=encode_errors)
+        return value.decode(encoding, errors=errors)
 
     return value
 
 
-def encoder(encoding: str = "utf8", encode_errors: str = "strict"):
+def encoder(encoding: str = "utf8", errors: str = "strict"):
     def wrapper(value):
-        return encode(value, encoding, encode_errors)
+        return encode(value, encoding, errors)
 
     return wrapper
 
 
-def decoder(encoding: str = "utf8", encode_errors: str = "strict"):
+def decoder(encoding: str = "utf8", errors: str = "strict"):
     def wrapper(value):
-        return decode(value, encoding, encode_errors)
+        return decode(value, encoding, errors)
 
     return wrapper
+
+
+DecodedTypeVar = typing.TypeVar("DecodedTypeVar", str, list, dict, bytes)
+
+
+def DecodedType(cls, encoding, errors):
+    import types
+
+    return types.new_class(
+        f"{cls.__name__}.{encoding}.{errors}",
+        bases=(cls,),
+        kwds={"_encodings": (encoding, errors)},
+    )
+
+
+class Decoded(typing.Generic[DecodedTypeVar]):
+    _encodings: tuple[str, str] = ("utf8", "strict")
+
+    def __new__(cls, *a, **kwa):
+        if a:
+            value = decode(a[0], *cls._encodings)
+
+            return super().__new__(cls, value, *a[1:], **kwa)
+
+        return super().__new__(cls, *a, **kwa)
+
+    def __init__(self, *a, **kwa) -> None:
+        if a:
+            value = decode(a[0], *self._encodings)
+            super().__init__(value, *a[1:], **kwa)  # type: ignore[call-arg]
+            return
+
+        super().__init__(*a, **kwa)
+
+    def __init_subclass__(cls, **kwa) -> None:
+        cls._encodings = kwa.get("_encodings") or cls._encodings
+
+    @property
+    def e(self) -> bytes | list[bytes] | dict[bytes, bytes]:
+        return encode(self, *self._encodings)
+
+    @property
+    def d(self) -> str | list[str] | dict[str, str]:
+        return decode(self, *self._encodings)
+
+
+class MString(Decoded[str], str):
+    def encode(self, encoding: str = "", errors: str = "strict") -> bytes:
+        if not encoding and not errors:
+            return self.e  # type: ignore[return-value]
+
+        encoding = encoding or "utf8"
+
+        return super().encode(encoding, errors)
+
+    def __init__(self, *a, **kwa) -> None: ...
+
+
+class MList(Decoded[list], list): ...
+
+
+class MDict(Decoded[dict], dict): ...

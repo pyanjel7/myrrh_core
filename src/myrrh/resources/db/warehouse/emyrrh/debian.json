@@ -1,0 +1,67 @@
+{
+    "items" : [
+        {
+            "type_" : "system",
+    
+            "os" : "posix",
+            "label" : "Debian",
+            "eol" : "\n",
+            "myrrhos" : "myrrh.framework.arch.posix.myrrhos"
+        },
+        {
+            "type_" : "directory",
+
+            "executables" : {
+                "find": "/usr/bin/find",
+                "ln": "/bin/ln",
+                "chown": "/bin/chown",
+                "chgrp": "/bin/chgrp",
+                "chmod": "/bin/chmod",
+                "mv": "/bin/mv",
+                "realpath": "/usr/bin/realpath",
+                "touch": "/usr/bin/touch",
+                "cat": "/bin/cat",
+                "pwd": "/bin/pwd",
+                "sh": "/bin/sh",
+                "which": "/usr/bin/which",
+                "dirname": "/usr/bin/dirname",
+                "id": "/usr/bin/id",
+                "stat": "/usr/bin/stat",
+                "echo": "/bin/echo",
+                "truncate": "/usr/bin/truncate",
+                "sleep": "/bin/sleep",
+                "ps": "/bin/ps",
+                "xargs": "/usr/bin/xargs",
+                "cp": "/bin/cp",
+                "tar": "/bin/tar",
+                "mkdir": "/bin/mkdir",
+                "rm": "/bin/rm",
+                "env": "/usr/bin/env"
+            },
+
+            "devnull" : "/dev/null",
+            "sep" : "/",
+            "curdir" : ".",
+            "pardir" : "..",
+            "extsep" : ".",
+            "pathsep" : ";",
+            "tmpdirs" : "/tmp",
+            "bindirs" : "/bin;/usr/bin"
+        },
+        {
+            "type_" : "vars",
+            "readonly" : [ "PPID", "SHELLOPTS" ]
+        },
+        {
+            "type_" : "shell",
+
+            "path" : "%(sh)s",
+            "args": [ "-c" ],
+            "commands" : {
+                "sh_shell": "%(env)s {ENV: -i {ENV}} {CWD: -C {CWD}} %(sh)s",
+                "sh_echo": "{MSG:(%(echo)s -n {MSG});}{MSG_ERR:(%(echo)s -n {MSG_ERR} 1>&2)}",
+                "sh_set": "set {KEY}{VALUE:={VALUE}}"
+            }
+        }
+    ]
+}

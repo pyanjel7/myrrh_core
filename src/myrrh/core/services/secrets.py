@@ -158,6 +158,8 @@ class DefaultSecretSrv(ISecretSrv):
         return _cfg_get()  # type: ignore[return-value]
 
     def encrypt(self, url: str, key_name: str | None = None) -> str:
+        key_name = key_name or "key"
+
         proto, _, msg = url.rpartition(PROTO_SEP)
         if proto and proto != PROTO_PLAIN:
             return url
@@ -213,7 +215,7 @@ def init_secret_srv(name: str | None = None, *a, **kwa):
             warnings.warn(f"unable to get secret service {service_name}, use default: {str(e)}")
 
     if not service.get_key("key"):
-        service.set_key()
+        service.set_key(key="key")
 
 
 def __getattr__(name):

@@ -50,7 +50,7 @@ def read_dist(path, entity):
             from mlib.py import os
 
         path = path.replace("\\", os.sep).replace("/", os.sep)
-        entity.runtime.myrrh_syscall.stream_in(os.fsencode(path), buf)
+        entity.runtime.myrrh_syscall.stream_in(path, buf)
         return buf.getbuffer().tobytes()
 
 
@@ -209,7 +209,7 @@ class SetupDirEntity(BMyrrhstProfile):
 
         for path in self.files:
             bmy.entity().runtime.myrrh_syscall.stream_out(
-                os.fsencode(path),
+                path,
                 localio.BytesIO(self.filecontents[os.path.basename(path)]["data"]),
             )
 

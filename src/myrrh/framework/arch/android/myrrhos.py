@@ -1,21 +1,12 @@
 import re
 import posixpath
 
-from myrrh.core.objects.system import AbcMyrrhOs, ExecutionFailureCauseRVal
+from myrrh.core.system import AbcMyrrhOs, ExecutionFailureCauseRVal
 from myrrh.utils import mshlex
 from myrrh.utils import merrno as errno
 
 
 class MyrrhOs(AbcMyrrhOs):
-    _curdirb_ = b"."
-    _pardirb_ = b".."
-    _extsepb_ = b"."
-    _sepb_ = b"/"
-    _pathsepb_ = b":"
-    _defpathb_ = b":/system/bin"
-    _altsepb_ = None
-    _devnullb_ = b"/dev/null"
-    _linesepb_ = b"\n"
 
     isabs = staticmethod(posixpath.isabs)  # type: ignore[assignment]
     normpath = staticmethod(posixpath.normpath)  # type: ignore[assignment]
@@ -23,46 +14,44 @@ class MyrrhOs(AbcMyrrhOs):
     basename = staticmethod(posixpath.basename)  # type: ignore[assignment]
     dirname = staticmethod(posixpath.dirname)  # type: ignore[assignment]
 
-    def _getbinb_(self):
+    def _getbin_(self):
         return {
-            b"find": b"/system/bin/find",
-            b"ln": b"/system/bin/ln",
-            b"chown": b"/system/bin/chown",
-            b"chgrp": b"/system/bin/chgrp",
-            b"chmod": b"/system/bin/chmod",
-            b"mv": b"/system/bin/mv",
-            b"realpath": b"command realpath",
-            b"touch": b"/system/bin/touch",
-            b"cat": b"/system/bin/cat",
-            b"pwd": b"command pwd",
-            b"sh": b"/system/bin/sh",
-            b"set": b"set",
-            b"which": b"command -v",
-            b"dirname": b"/system/bin/dirname",
-            b"id": b"/system/bin/id",
-            b"stat": b"/system/bin/stat",
-            b"echo": b"print",
-            b"truncate": b"/system/bin/truncate",
-            b"sleep": b"/system/bin/sleep",
-            b"ps": b"/system/bin/ps",
-            b"xargs": b"/system/bin/xargs",
-            b"getprop": b"/system/bin/getprop",
-            b"cp": b"/system/bin/cp",
-            b"tar": b"/system/bin/tar",
+            "find": "/system/bin/find",
+            "ln": "/system/bin/ln",
+            "chown": "/system/bin/chown",
+            "chgrp": "/system/bin/chgrp",
+            "chmod": "/system/bin/chmod",
+            "mv": "/system/bin/mv",
+            "realpath": "command realpath",
+            "touch": "/system/bin/touch",
+            "cat": "/system/bin/cat",
+            "pwd": "command pwd",
+            "sh": "/system/bin/sh",
+            "set": "set",
+            "which": "command -v",
+            "dirname": "/system/bin/dirname",
+            "id": "/system/bin/id",
+            "stat": "/system/bin/stat",
+            "echo": "print",
+            "truncate": "/system/bin/truncate",
+            "sleep": "/system/bin/sleep",
+            "ps": "/system/bin/ps",
+            "xargs": "/system/bin/xargs",
+            "getprop": "/system/bin/getprop",
+            "cp": "/system/bin/cp",
+            "tar": "/system/bin/tar",
         }
 
-    def _getdefaultshellb_(self):
-        return self.getenvb().get(b"SHELL", self._getbinb_()[b"sh"])
+    def _getdefaultshell_(self):
+        return self.getenv().get("SHELL", self._getbin_()["sh"])
 
-    def _getdefaultshellargsb_(self):
-        return (b"-c",)
+    def _getdefaultshellargs_(self):
+        return ("-c",)
 
     def formatshellargs(self, args, *, defaultargs=None):
-        if isinstance(args, str):
-            args = args.encode()
         return (
             *defaultargs,
-            mshlex.list2cmdlineb(args).strip(b'"') if isinstance(args, (list, tuple)) else args,
+            mshlex.list2cmdline(args).strip('"') if isinstance(args, (list, tuple)) else args,
         )
 
     def _getdefaultencoding_(self):
@@ -74,36 +63,36 @@ class MyrrhOs(AbcMyrrhOs):
     def _fsencodeerrors_(self):
         return "surrogateescape"
 
-    def sh_escape_bytes(self, string):
-        return mshlex.quoteb(string)
+    def sh_escape(self, string: str):
+        return mshlex.quote(string)
 
-    def _localecode_(self):
+    def _locale_(self):
         return ""
 
-    def _getcwdb_(self):
-        out, err, rval = self.cmdb(b"%(pwd)s")
+    def _getcwd_(self):
+        out, err, rval = self.cmd("%(pwd)s")
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
         return out
 
-    def _getreadonlyenvb_(self):
-        return (b"PPID", b"KSH_VERSION", b"PIPESTATUS")
+    def _getreadonlyenv_(self):
+        return ("PPID", "KSH_VERSION", "PIPESTATUS")
 
-    def _envb_(self):
-        out, err, rval = self.cmdb(b"%(set)s")
+    def _env_(self):
+        out, err, rval = self.cmd("%(set)s")
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
-        env = {k: v for k, v in re.findall(b"(?P<k>[^\\n=]*)=(?P<v>'[^']*'\\n|.*\\n)", out)}
-        env = {k: v.rstrip(b"\n") for k, v in env.items()}
+        env = {k: v for k, v in re.findall("(?P<k>[^\\n=]*)=(?P<v>'[^']*'\\n|.*\\n)", out)}
+        env = {k: v.rstrip("\n") for k, v in env.items()}
         return env
 
-    def _gettmpdirb_(self):
-        out, err, rval = self.cmdb(b'%(echo)s "$TMPDIR:$TEMP:$TMP:`[ -d /tmp ] && %(echo)s /tmp`:`[ -d /var/tmp ] && %(echo)s /var/tmp`:`[ -d /usr/tmp ] && %(echo)s /usr/tmp`"')
+    def _gettmpdir_(self):
+        out, err, rval = self.cmd('%(echo)s "$TMPDIR:$TEMP:$TMP:`[ -d /tmp ] && %(echo)s /tmp`:`[ -d /var/tmp ] && %(echo)s /var/tmp`:`[ -d /usr/tmp ] && %(echo)s /usr/tmp`"')
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
 
-        dirlist = [dir for dir in filter(None, out.split(b":"))]
+        dirlist = [dir for dir in filter(None, out.split(":"))]
         return dirlist[0] if dirlist else self._getcwdb_()
 
     def default_errno_from_msg(self, err):
         err = self.shencode(err)
-        return errno.errno_from_msgb(err)
+        return errno.errno_from_msg(err)
 
     environkeyformat = None  # type: ignore[assignment]

@@ -301,8 +301,7 @@ class MyrrhGroup:
 
         return _MyrrhRuntimeGroup()
 
-    def __init_subclass__(cls, namedtuple_, async_):
-        ...
+    def __init_subclass__(cls, namedtuple_, async_): ...
 
     @property  # type: ignore[misc]
     def __class__(self):

@@ -74,8 +74,7 @@ def password(encrypt, decrypt, key):
 if __name__ == "__main__":
 
     @click.group
-    def main():
-        ...
+    def main(): ...
 
     main.command(secret)
     main.command(hash)

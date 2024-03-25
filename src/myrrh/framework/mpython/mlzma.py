@@ -2,7 +2,7 @@ import typing
 import io
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -14,23 +14,19 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def LZMACompressor(self) -> local_lzma.LZMACompressor:
-        ...
+    def LZMACompressor(self) -> local_lzma.LZMACompressor: ...
 
     @property
     @abstractmethod
-    def LZMADecompressor(self) -> local_lzma.LZMADecompressor:
-        ...
+    def LZMADecompressor(self) -> local_lzma.LZMADecompressor: ...
 
     @property
     @abstractmethod
-    def LZMAFile(self) -> local_lzma.LZMAFile:
-        ...
+    def LZMAFile(self) -> local_lzma.LZMAFile: ...
 
     @property
     @abstractmethod
-    def LZMAError(self) -> local_lzma.LZMAError:
-        ...
+    def LZMAError(self) -> local_lzma.LZMAError: ...
 
     @property
     @abstractmethod
@@ -188,28 +184,22 @@ class _interface(ABC):
         return self.local_lzma.PRESET_EXTREME
 
     @abstractmethod
-    def open(self, filename, mode="rb", *, format=None, check=-1, preset=None, filters=None, encoding=None, errors=None, newline=None) -> io.TextIOWrapper | local_lzma.LZMAFile:
-        ...
+    def open(self, filename, mode="rb", *, format=None, check=-1, preset=None, filters=None, encoding=None, errors=None, newline=None) -> io.TextIOWrapper | local_lzma.LZMAFile: ...
 
     @abstractmethod
-    def compress(self, data, format=local_lzma.FORMAT_XZ, check=-1, preset=None, filters=None) -> typing.Any:
-        ...
+    def compress(self, data, format=local_lzma.FORMAT_XZ, check=-1, preset=None, filters=None) -> typing.Any: ...
 
     @abstractmethod
-    def decompress(self, data, format=local_lzma.FORMAT_AUTO, memlimit=None, filters=None) -> typing.Any:
-        ...
+    def decompress(self, data, format=local_lzma.FORMAT_AUTO, memlimit=None, filters=None) -> typing.Any: ...
 
     @abstractmethod
-    def is_check_supported(self, check) -> bool:
-        ...
+    def is_check_supported(self, check) -> bool: ...
 
     @abstractmethod
-    def _decode_filter_properties(self, filter, data) -> typing.Any:
-        ...
+    def _decode_filter_properties(self, filter, data) -> typing.Any: ...
 
     @abstractmethod
-    def _encode_filter_properties(self, filter, data) -> typing.Any:
-        ...
+    def _encode_filter_properties(self, filter, data) -> typing.Any: ...
 
 
 class AbcLzma(_interface, AbcRuntimeDelegate):

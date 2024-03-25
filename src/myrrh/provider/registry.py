@@ -3,11 +3,11 @@ import typing
 
 from myrrh.core.services.plugins import load_ext_group
 
-from ._iprovider import IProvider
+from ..core.interfaces.iprovider import IProvider
 
 
 class ProviderRegistry:
-    providers: dict[str, typing.Type[IProvider]] = {}
+    providers: dict[str, type[IProvider]] = {}
 
     provider_sep = "_"
     provider_prefix = provider_sep.join(("myrrh", "provider"))
@@ -19,10 +19,10 @@ class ProviderRegistry:
             cls.__single__ = super().__new__(cls)
         return cls.__single__
 
-    def __getattr__(self, name) -> typing.Type[IProvider]:
+    def __getattr__(self, name) -> type[IProvider]:
         return self.get(name)
 
-    def get(self, name: str) -> typing.Type[IProvider]:
+    def get(self, name: str) -> type[IProvider]:
         try:
             return self.providers[name]
         except KeyError:
@@ -62,13 +62,12 @@ class ProviderRegistry:
 
         return version
 
-    def _new_provider(self, provider_cls: typing.Type[IProvider]):
+    def _new_provider(self, provider_cls: type[IProvider]):
         assert issubclass(provider_cls, IProvider), f"{repr(provider_cls)} is not a valid provider implementation, provider must inherit from IProvider"
 
-        self.providers[provider_cls._name_] = provider_cls
+        self.providers[provider_cls._name_] = provider_cls  # type: ignore[index]
 
     def register(self, provider_cls):
-
         self._new_provider(provider_cls)
 
 

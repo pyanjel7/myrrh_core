@@ -8,7 +8,7 @@ import signal
 
 # from myrrh.utils import getch
 
-from myrrh.core.objects.system import MOsError, AbcRuntime, ImplPropertyClass
+from myrrh.core.system import MOsError, AbcRuntime, ImplPropertyClass
 
 from . import mimportlib
 
@@ -129,9 +129,9 @@ class AbcOsProcess(AbcRuntime):
             stream += "w"
 
         handle = self.myrrh_syscall.openprocess(
-            [path] + [self.myrrh_os.fsencode(a) for a in args[1:]],
+            [path] + [a for a in args[1:]],
             stream,
-            env=None if env is None else {self.myrrh_os.fsencode(k): self.myrrh_os.fsencode(v) for k, v in env.items()},
+            env=env,
         )
 
         th_out = threading.Thread(
@@ -228,7 +228,7 @@ class AbcOsProcess(AbcRuntime):
             returncode = self._proc.wait()
             if returncode == 0:
                 return None
-            if self.__rself__.cfg.system.os == "nt":
+            if self.__rself__.reg.system.os == "nt":
                 return returncode
             else:
                 return returncode << 8
@@ -246,7 +246,7 @@ class AbcOsProcess(AbcRuntime):
             return iter(self._stream)
 
     def system(self, command):
-        shell = list(self.getdefaultshellb(command))
+        shell = list(self.myrrh_os.getdefaultshell(command))
 
         rval = self._spawnve(self.P_INTERACT, shell[0], shell, env=None)
         return rval

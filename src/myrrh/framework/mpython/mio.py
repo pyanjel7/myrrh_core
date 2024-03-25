@@ -1,7 +1,7 @@
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -54,78 +54,63 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def IOBase(self) -> local_io.IOBase:
-        ...
+    def IOBase(self) -> local_io.IOBase: ...
 
     @property
     @abstractmethod
-    def RawIOBase(self) -> local_io.RawIOBase:
-        ...
+    def RawIOBase(self) -> local_io.RawIOBase: ...
 
     @property
     @abstractmethod
-    def FileIO(self) -> local_io.FileIO:
-        ...
+    def FileIO(self) -> local_io.FileIO: ...
 
     @property
     @abstractmethod
-    def BytesIO(self) -> local_io.BytesIO:
-        ...
+    def BytesIO(self) -> local_io.BytesIO: ...
 
     @property
     @abstractmethod
-    def StringIO(self) -> local_io.StringIO:
-        ...
+    def StringIO(self) -> local_io.StringIO: ...
 
     @property
     @abstractmethod
-    def BufferedIOBase(self) -> local_io.BufferedIOBase:
-        ...
+    def BufferedIOBase(self) -> local_io.BufferedIOBase: ...
 
     @property
     @abstractmethod
-    def BufferedReader(self) -> local_io.BufferedReader:
-        ...
+    def BufferedReader(self) -> local_io.BufferedReader: ...
 
     @property
     @abstractmethod
-    def BufferedWriter(self) -> local_io.BufferedWriter:
-        ...
+    def BufferedWriter(self) -> local_io.BufferedWriter: ...
 
     @property
     @abstractmethod
-    def BufferedRWPair(self) -> local_io.BufferedRWPair:
-        ...
+    def BufferedRWPair(self) -> local_io.BufferedRWPair: ...
 
     @property
     @abstractmethod
-    def BufferedRandom(self) -> local_io.BufferedRandom:
-        ...
+    def BufferedRandom(self) -> local_io.BufferedRandom: ...
 
     @property
     @abstractmethod
-    def TextIOBase(self) -> local_io.TextIOBase:
-        ...
+    def TextIOBase(self) -> local_io.TextIOBase: ...
 
     @property
     @abstractmethod
-    def TextIOWrapper(self) -> local_io.TextIOWrapper:
-        ...
+    def TextIOWrapper(self) -> local_io.TextIOWrapper: ...
 
     @property
     @abstractmethod
-    def UnsupportedOperation(self) -> local_io.UnsupportedOperation:
-        ...
+    def UnsupportedOperation(self) -> local_io.UnsupportedOperation: ...
 
     @property
     @abstractmethod
-    def IncrementalNewlineDecoder(self) -> local_io.IncrementalNewlineDecoder:
-        ...
+    def IncrementalNewlineDecoder(self) -> local_io.IncrementalNewlineDecoder: ...
 
     @property
     @abstractmethod
-    def BlockingIOError(self) -> local_io.BlockingIOError:
-        ...
+    def BlockingIOError(self) -> local_io.BlockingIOError: ...
 
     @property
     @abstractmethod
@@ -158,16 +143,14 @@ class _interface(ABC):
         newline=None,
         closefd=True,
         opener=None,
-    ) -> typing.Any:
-        ...
+    ) -> typing.Any: ...
 
     @abstractmethod
     def open_code(self, path: str):
         return self.local_io.open_code("")
 
     @abstractmethod
-    def text_encoding(self, encoding, stacklevel=2) -> typing.Any | typing.Literal["utf-8", "locale"]:
-        ...
+    def text_encoding(self, encoding, stacklevel=2) -> typing.Any | typing.Literal["utf-8", "locale"]: ...
 
 
 class AbcIo(_interface, AbcRuntimeDelegate):

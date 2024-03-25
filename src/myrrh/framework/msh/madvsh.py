@@ -13,9 +13,8 @@ import weakref
 
 from myrrh.utils import mtimer, mshlex
 
-from myrrh.core.interfaces import IInStream, IProcess
-from myrrh.core.objects.system import AbcRuntime, InheritedPropertyClass
-from myrrh.utils import mstring
+from myrrh.core.interfaces import IInStream, IProcess, IMyrrhOs
+from myrrh.core.system import AbcRuntime, InheritedPropertyClass
 
 __mlib__ = "AbcAdvSh"
 
@@ -60,13 +59,13 @@ class AbcAdvSh(AbcRuntime):
         pass
 
     class execute(metaclass=InheritedPropertyClass(list)):  # type: ignore[misc]
+        myrrh_os: IMyrrhOs
+
         def __init__(
             self,
-            cmd,
+            cmd: str,
             *,
             path=None,
-            encoding=None,
-            errors=None,
             count=None,
             during=None,
             interval=None,
@@ -77,17 +76,13 @@ class AbcAdvSh(AbcRuntime):
             raiseontimeout=True,
         ):
             self._cmd = cmd
-            if isinstance(cmd, (str, bytes)):
-                if path:
-                    raise ValueError("bytes or string is not supported for cmd when path parameter is set")
 
-                self._cast = encoding and mstring.cast(cmd, encoding=encoding, errors=errors) or self.myrrh_os.shcast(cmd)
-                self._args = encoding and mstring.typebytes(encoding, errors)(cmd) or self.myrrh_os.shencode(cmd)
+            if isinstance(cmd, str):
+                if path:
+                    raise ValueError("string is not supported for cmd when path parameter is set")
             else:
                 if not path:
-                    raise ValueError("only bytes or string is supported for cmd when path parameter is not set")
-                self._cast = encoding and mstring.cast(cmd, encoding=encoding, errors=errors) or self.myrrh_os.fscast(cmd[0])
-                self._args = [(encoding and mstring.typebytes(encoding, errors)(a) or self.myrrh_os.fsencode(a)) for a in cmd]
+                    raise ValueError("string is supported for cmd when path parameter is not set")
 
             self.__poll = poll
             self.__ttl = ttl
@@ -111,17 +106,14 @@ class AbcAdvSh(AbcRuntime):
             _, timeout = self._timeout
             self.__oneexecution = (not count and not timeout and not during) or (not poll and not count and eval_count == 1)
 
-            if path:
-                self._path = encoding and mstring.typebytes(path, encoding=encoding, errors=errors) or self.myrrh_os.fsencode(path)
-            else:
-                self._path = None
+            self._path = path
 
             if not self._path and timeout is not None:
-                args = self.myrrh_os.getdefaultshellb(self._args)
+                args = self.myrrh_os.getdefaultshell(self._cmd)
                 self._path = args[0]
                 self._args = args
             elif path:
-                self._args = mshlex.list2cmdlineb(self._args)
+                self._args = mshlex.list2cmdline(self._cmd) 
 
             if self.__oneexecution:
                 self.values()
@@ -143,8 +135,8 @@ class AbcAdvSh(AbcRuntime):
             return timeout_cause, timeout
 
         def __repr__(self):
-            cmd = self._cast(self._path + b" ") or self._cast(b"")
-            cmd += self._cast(b" ".join(self._args) if isinstance(self._args, (list, tuple)) else self._args)
+            cmd = self._path + " "
+            cmd += " ".join(self._args) if isinstance(self._args, (list, tuple)) else self._args
 
             if self.__oneexecution:
                 return "<%s> %s" % (cmd, self[0].state)
@@ -163,7 +155,7 @@ class AbcAdvSh(AbcRuntime):
                     try:
                         with self.__ttl_timer:
                             try:
-                                with _ExecutionInformation(proc=proc, cast=self._cast) as exe:
+                                with _ExecutionInformation(proc=proc) as exe:
                                     proc.exec()
 
                                     self.append(exe)
@@ -242,7 +234,7 @@ class AbcAdvSh(AbcRuntime):
         # general execution information
         @property
         def cmd(self):
-            return self._cast(self._cmd)
+            return self._cmd
 
         @property
         def ncalls(self):
@@ -414,9 +406,9 @@ class _AdvshellProc:
 class _ExecutionInformation:
     MAX_BUFFER_SIZE = 50000
 
-    def __init__(self, proc, cast, **kwargs):
+    def __init__(self, proc, **kwargs):
         self._proc = proc
-        self._cast = cast
+
         self._timer = mtimer.MTimer()
         self._state = None
 
@@ -516,11 +508,11 @@ class _ExecutionInformation:
 
     @property
     def out(self):
-        return self._cast(self._out)
+        return self._out
 
     @property
     def err(self):
-        return self._cast(self._err)
+        return self._err
 
     @property
     def rval(self):

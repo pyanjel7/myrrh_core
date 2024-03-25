@@ -29,11 +29,11 @@ class BmyEntity:
         return self._eid
 
     @property
-    def cfg(self):
+    def reg(self):
         if not self.built:
             raise BmyNotReady(self._eid)
 
-        return self._entity.cfg
+        return self._entity.reg
 
     @property
     def system(self):

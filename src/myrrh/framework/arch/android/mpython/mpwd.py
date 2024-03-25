@@ -1,8 +1,8 @@
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 from ._mosenv import OsEnv
 
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 from collections import namedtuple
 
 __mlib__ = "AbcPwd"
@@ -36,7 +36,7 @@ class AbcPwd(AbcRuntime):
         raise KeyError("getpwnam(): name not found: %s" % name)
 
     def getpwall(self):
-        out, err, rval = self.myrrh_os.cmd(b"%(cat)s /etc/passwd")
+        out, err, rval = self.myrrh_os.cmd("%(cat)s /etc/passwd")
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
 
         pwall = []

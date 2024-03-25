@@ -1,7 +1,7 @@
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from myrrh.framework.mpython import mbuiltins
 
@@ -12,16 +12,13 @@ class _interface(ABC):
     import test.support.script_helper as local_script_helper  # type: ignore[import-not-found]
 
     @abstractmethod
-    def assert_python_ok(self, *args, **env_vars) -> typing.Any:
-        ...
+    def assert_python_ok(self, *args, **env_vars) -> typing.Any: ...
 
     @abstractmethod
-    def assert_python_failure(self, *args, **env_vars) -> typing.Any:
-        ...
+    def assert_python_failure(self, *args, **env_vars) -> typing.Any: ...
 
     @abstractmethod
-    def run_python_until_end(self, *args, **env_vars) -> typing.Any:
-        ...
+    def run_python_until_end(self, *args, **env_vars) -> typing.Any: ...
 
 
 class AbcScriptHelper(_interface, AbcRuntimeDelegate):

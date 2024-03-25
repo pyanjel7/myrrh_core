@@ -1,20 +1,20 @@
 import os
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 
 
 class Ansimap(AbcRuntime):
     CSI = {
-        b"H": b"\033[A",
-        b"P": b"\033[B",
-        b"M": b"\033[C",
-        b"K": b"\033[D",
-        b"I": b"\033[S",
-        b"Q": b"\033[T",
-        b"R": b"\033[1P",
-        b"S": b"\x7F",
-        b"G": b"\033[H",
-        b"O": b"\033[F",
+        "H": "\033[A",
+        "P": "\033[B",
+        "M": "\033[C",
+        "K": "\033[D",
+        "I": "\033[S",
+        "Q": "\033[T",
+        "R": "\033[1P",
+        "S": "\x7F",
+        "G": "\033[H",
+        "O": "\033[F",
     }
 
     def __init__(self, iterator, abortkey=None):

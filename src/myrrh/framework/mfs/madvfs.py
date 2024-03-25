@@ -9,7 +9,7 @@ from myrrh import PID
 
 from myrrh.utils.delegation import abstractmethod
 from myrrh.core.services.config import cfg_prop
-from myrrh.core.objects.system import AbcRuntime, FileException, _mlib_
+from myrrh.core.system import AbcRuntime, FileException, _mlib_
 from ..mpython import _mosfs
 
 __mlib__ = "AbcAdvFs"
@@ -140,7 +140,7 @@ class AbcAdvFs(AbcRuntime):
         path = self.myrrh_os.p(path)
 
         root = path if path.endswith(self.myrrh_os.sepb) else path + self.myrrh_os.sepb
-        root = self.myrrh_os.getpathb(root)
+        root = self.myrrh_os.getpath(root)
 
         dirs, files = self._scantree(path)
 
@@ -183,10 +183,10 @@ class AbcAdvFs(AbcRuntime):
             _cast_ = self.myrrh_os.fdcast(path)
             path = self.myrrh_os.p(path)
 
-            if self.myrrh_os._sepb_ == b"\\":
-                path = path.replace(b"/", self.myrrh_os._sepb_)
+            if self.myrrh_os.sep == "\\":
+                path = path.replace("/", self.myrrh_os.sep)
             else:
-                path = path.replace(b"\\", self.myrrh_os._sepb_)
+                path = path.replace("\\", self.myrrh_os.sep)
 
             return _cast_(path)
 
@@ -207,15 +207,15 @@ class AbcAdvFs(AbcRuntime):
 
     def _chunk_file_name(self, chunk_nb=None, chunk_name=None):
         if chunk_nb is None:
-            return b"%d%d%s" % (PID, id(self), self.myrrh_os.cfg.uuid.encode())
+            return "%d%d%s" % (PID, id(self), self.myrrh_os.reg.uuid.encode())
 
         if chunk_name:
-            return b"%s%d.chunk" % (chunk_name, chunk_nb)
+            return "%s%d.chunk" % (chunk_name, chunk_nb)
 
-        return b"%d%d%s%d.chunk" % (
+        return "%d%d%s%d.chunk" % (
             PID,
             id(self),
-            self.myrrh_os.cfg.uuid.encode(),
+            self.myrrh_os.reg.uuid.encode(),
             chunk_nb,
         )
 
@@ -327,9 +327,9 @@ class AbcAdvFs(AbcRuntime):
         filtered_dirs = []
         for i in range(0, len(dirs) - 1):
             if not dirs[i] in dirs[i + 1]:
-                filtered_dirs.append(self.myrrh_os.sh_escape_bytes(self.myrrh_os.p(dirs[i])))
+                filtered_dirs.append(self.myrrh_os.sh_escape(self.myrrh_os.p(dirs[i])))
         if dirs:
-            filtered_dirs.append(self.myrrh_os.sh_escape_bytes(self.myrrh_os.p(dirs[-1])))
+            filtered_dirs.append(self.myrrh_os.sh_escape(self.myrrh_os.p(dirs[-1])))
 
         self._mkdirs(filtered_dirs)
 
@@ -370,7 +370,7 @@ class AbcAdvFs(AbcRuntime):
 
         for src, dest, ischunk, file_descs in self._makechunks(src_files, dest_files, sizes, chunk_size):
             with AdvFsFileW(dest) as stream:
-                self.myrrh_syscall.stream_in(os.fsencode(src), stream)
+                self.myrrh_syscall.stream_in(src, stream)
 
                 if ischunk:
                     stream.seek(0)
@@ -418,7 +418,7 @@ class AbcAdvFs(AbcRuntime):
         if not chunk_size:
             for src, dest in zip(src_files, dest_files):
                 with AdvFsFileR(src) as f:
-                    self.myrrh_syscall.stream_out(self.myrrh_os.fsencode(dest), f)
+                    self.myrrh_syscall.stream_out(dest, f)
                     result.append(dest)
 
             return result
@@ -430,7 +430,7 @@ class AbcAdvFs(AbcRuntime):
 
         for src, dest, merged, file_descs in self._local_makechunks(src_files, dest_files, sizes, chunk_size=chunk_size):
             with AdvFsFileR(src) as stream:
-                self.myrrh_syscall.stream_out(os.fsencode(dest), stream)
+                self.myrrh_syscall.stream_out(dest, stream)
             if merged:
                 self._unchunk(dest)
 
@@ -439,7 +439,7 @@ class AbcAdvFs(AbcRuntime):
         return result
 
     def pushfile(self, src, dest=""):
-        if self.myrrh_os.fs.is_container(self.myrrh_os.fsencode(dest)):
+        if self.myrrh_os.fs.is_container(dest):
             dest = self.myrrh_os.joinpath(dest, os.path.basename(src))
 
         dests = [] if not dest else [dest]
@@ -448,7 +448,7 @@ class AbcAdvFs(AbcRuntime):
 
     def pushdir(self, src, dest="", *, chunk_size=CHUNK_SZ):
         if not dest:
-            dest = self.myrrh_os.fsdecode(self.myrrh_os._getcwdb_())
+            dest = self.myrrh_os.getpath()
 
         dirs, files, sizes = self.local_scantree(src)
         dirs = [self.myrrh_os.joinpath(*d.split(os.sep)) for d in dirs]
@@ -469,9 +469,8 @@ class AbcAdvFs(AbcRuntime):
 
     def trmod(self, srcpath, destpath, mode=-1):
         self.myrrh_os.p = self.myrrh_os.p(destpath)
-        srcpath = os.fsencode(srcpath)
 
-        fmode = mode if mode != -1 else ("%o" % os.stat(srcpath).st_mode)[-3:] if os.name == self.myrrh_os.cfg.os else self.default_mode
+        fmode = mode if mode != -1 else ("%o" % os.stat(srcpath).st_mode)[-3:] if os.name == self.myrrh_os.reg.os else self.default_mode
 
         if fmode != -1:
             self.chmod(fmode, destpath)
@@ -501,7 +500,7 @@ class AbcAdvFs(AbcRuntime):
                     FileException(entity, errno=errno.ENOENT, filename=src).raised()
 
                 with AdvFsFileGet(entity, entity.myrrh_os.p(src), sz) as f:
-                    self.myrrh_syscall.stream_out(self.myrrh_os.fsencode(dest), f)
+                    self.myrrh_syscall.stream_out(dest, f)
                 result.append(dest)
 
             return result
@@ -515,9 +514,9 @@ class AbcAdvFs(AbcRuntime):
                 if dest is None:
                     dest = self.myrrh_os.joinpath(
                         target_tempdir,
-                        entity.myrrh_os.p(entity.myrrh_os.basename(src) + b"_"),
+                        entity.myrrh_os.p(entity.myrrh_os.basename(src) + "_"),
                     )
-                self.myrrh_syscall.stream_out(self.myrrh_os.fsencode(dest), stream)
+                self.myrrh_syscall.stream_out(dest, stream)
 
                 if ischunk:
                     self._unchunk(dest)
@@ -545,17 +544,17 @@ class AbcAdvFs(AbcRuntime):
         dest = self.myrrh_os.p(dest)
 
         if not dest:
-            dest = self.myrrh_os.getpathb()
+            dest = self.myrrh_os.getpath()
 
         if self.myrrh_os.fs.is_container(dest) or dest.endswith(self.myrrh_os.sepb):
-            dest = self.myrrh_os.joinpath(dest, e_advfs.myrrh_os.fsencode(e_advfs.myrrh_os.basename(src)))
+            dest = self.myrrh_os.joinpath(dest, e_advfs.myrrh_os.basename(src))
 
         dirs, files, sizes = e_advfs.scantree(src)
 
         self.mkdirs(
             list(
                 map(
-                    lambda d: self.myrrh_os.joinpath(dest, self.myrrh_os.fsencode(self.trpath(d))),
+                    lambda d: self.myrrh_os.joinpath(dest, self.trpath(d)),
                     dirs,
                 )
             )
@@ -563,7 +562,7 @@ class AbcAdvFs(AbcRuntime):
         files = self.transferfiles(
             entity,
             [e_advfs.myrrh_os.joinpath(src, f) for f in files],
-            [self.myrrh_os.joinpath(dest, self.myrrh_os.fsencode(f)) for f in files],
+            [self.myrrh_os.joinpath(dest, f) for f in files],
             sizes=sizes,
             chunk_size=chunk_size,
         )
@@ -609,8 +608,7 @@ class AbcAdvFs(AbcRuntime):
         self._localmove(srcs, dest)
 
     @abstractmethod
-    def _localmove(self, src, dest):
-        ...
+    def _localmove(self, src, dest): ...
 
     def rm(self, srcs):
         """
@@ -621,8 +619,7 @@ class AbcAdvFs(AbcRuntime):
         self._localremove(srcs)
 
     @abstractmethod
-    def _localremove(self, srcs):
-        ...
+    def _localremove(self, srcs): ...
 
 
 AdvFs = AbcAdvFs

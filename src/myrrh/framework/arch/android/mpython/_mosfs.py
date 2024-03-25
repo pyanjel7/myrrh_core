@@ -2,7 +2,7 @@ import errno
 import stat
 import time
 import os
-from myrrh.core.objects.system import ExecutionFailureCauseRVal, MOsError, supportedif
+from myrrh.core.system import ExecutionFailureCauseRVal, MOsError, supportedif
 
 from myrrh.framework.mpython._mosfs import AbcOsFs, stat_result
 import posixpath
@@ -11,7 +11,7 @@ __mlib__ = "OsFs"
 
 
 def _stat_out_to_struct(out):
-    stat_list = [int(v, 0) for v in out.strip().split(b",")]
+    stat_list = [int(v, 0) for v in out.strip().split(",")]
     stat_list[-3] = float(stat_list[-3])
     stat_list[-2] = float(stat_list[-2])
     stat_list[-1] = float(stat_list[-1])
@@ -26,7 +26,7 @@ def _stat_out_to_struct(out):
 
 
 def _statvfs_out_to_struct(out):
-    stat_list = [int(v, 0) for v in out.strip().split(b",")]
+    stat_list = [int(v, 0) for v in out.strip().split(",")]
     return OsFs.statvfs_result(*stat_list)
 
 
@@ -44,10 +44,10 @@ class OsFs(AbcOsFs):
         _dst = self.myrrh_os.p(dst, dir_fd=dst_dir_fd)
 
         _, err, rval = self.myrrh_os.cmd(
-            b"%(ln)s %(follow)s %(src)s %(dst)s",
-            follow=b"" if follow_symlinks else b"-n",
-            src=self.myrrh_os.sh_escape_bytes(_src),
-            dst=self.myrrh_os.sh_escape_bytes(_dst),
+            "%(ln)s %(follow)s %(src)s %(dst)s",
+            follow="" if follow_symlinks else "-n",
+            src=self.myrrh_os.sh_escape(_src),
+            dst=self.myrrh_os.sh_escape(_dst),
         )
         ExecutionFailureCauseRVal(self, err, rval, 0, src, error_translate=self._os.default_errno_from_msg).check()
 
@@ -62,20 +62,20 @@ class OsFs(AbcOsFs):
         if uid == -1 and gid == -1:
             return
 
-        exe = b"%(chown)s" if uid != -1 else b"%(chgrp)s"
-        symlink = b"" if follow_symlinks else b"-h"
-        user = b"'%i'" % uid if uid != -1 else b""
-        group = b"'%i'" % gid if gid != -1 else b""
+        exe = "%(chown)s" if uid != -1 else "%(chgrp)s"
+        symlink = "" if follow_symlinks else "-h"
+        user = "'%i'" % uid if uid != -1 else ""
+        group = "'%i'" % gid if gid != -1 else ""
 
-        _, err, rval = self.myrrh_os.cmdb(
-            b"%s %s %s%s%s %s"
+        _, err, rval = self.myrrh_os.cmd(
+            "%s %s %s%s%s %s"
             % (
                 exe,
                 symlink,
                 user,
-                b":" if uid != -1 and gid != -1 else b"",
+                ":" if uid != -1 and gid != -1 else "",
                 group,
-                self.myrrh_os.sh_escape_bytes(_path),
+                self.myrrh_os.sh_escape(_path),
             )
         )
         ExecutionFailureCauseRVal(self, err, rval, 0, path, error_translate=self._os.default_errno_from_msg).check()
@@ -84,10 +84,10 @@ class OsFs(AbcOsFs):
         # follow_symlinks is ignore
         _path = self.myrrh_os.p(path, dir_fd=dir_fd)
         mode = stat.S_IMODE(mode)
-        _, err, rval = self.myrrh_os.cmdb(
-            b"%(chmod)s %(mode)o %(path)s",
+        _, err, rval = self.myrrh_os.cmd(
+            "%(chmod)s %(mode)o %(path)s",
             mode=mode,
-            path=self.myrrh_os.sh_escape_bytes(_path),
+            path=self.myrrh_os.sh_escape(_path),
         )
         ExecutionFailureCauseRVal(self, err, rval, 0, path, error_translate=self._os.default_errno_from_msg).check()
 
@@ -95,10 +95,10 @@ class OsFs(AbcOsFs):
         _src = self.myrrh_os.p(src, dir_fd=src_dir_fd)
         _dst = self.myrrh_os.p(dst, dir_fd=dst_dir_fd)
 
-        _, err, rval = self.myrrh_os.cmdb(
-            b"%(mv)s %(src)s %(dst)s",
-            src=self.myrrh_os.sh_escape_bytes(_src),
-            dst=self.myrrh_os.sh_escape_bytes(_dst),
+        _, err, rval = self.myrrh_os.cmd(
+            "%(mv)s %(src)s %(dst)s",
+            src=self.myrrh_os.sh_escape(_src),
+            dst=self.myrrh_os.sh_escape(_dst),
         )
         ExecutionFailureCauseRVal(self, err, rval, 0, src, error_translate=self._os.default_errno_from_msg).check()
 
@@ -146,12 +146,12 @@ class OsFs(AbcOsFs):
     def _lstat(self, path, *, dir_fd=None):
         return self._stat(path, dir_fd=dir_fd, follow_symlinks=False)
 
-    @supportedif(lambda self: b"statvfs" in self.myrrh_os.getbinb, "need statvfs tool")
+    @supportedif(lambda self: "statvfs" in self.myrrh_os.getbinb, "need statvfs tool")
     def _statvfs(self, path):
         _path = self.myrrh_os.f(path)
 
-        command = b" if [ -e %(path)s ] ; then %(stat)s -f -c %%s,%%S,%%b,%%f,%%a,%%c,%%d,%%d,-1,%%l  %(path)s; else ls %(path)s; fi"
-        out, err, rval = self.myrrh_os.cmdb(command, path=self.myrrh_os.sh_escape_bytes(_path))
+        command = " if [ -e %(path)s ] ; then %(stat)s -f -c %%s,%%S,%%b,%%f,%%a,%%c,%%d,%%d,-1,%%l  %(path)s; else ls %(path)s; fi"
+        out, err, rval = self.myrrh_os.cmd(command, path=self.myrrh_os.sh_escape(_path))
         ExecutionFailureCauseRVal(self, err, rval, 0, path, error_translate=self._os.default_errno_from_msg).check()
 
         return _statvfs_out_to_struct(out)
@@ -160,7 +160,7 @@ class OsFs(AbcOsFs):
         _cast_ = self.myrrh_os.fdcast(path)
         path = self.myrrh_os.p(path)
 
-        out, err, rval = self.myrrh_os.cmdb(b"%(realpath)s %(path)s", path=self.myrrh_os.sh_escape_bytes(path))
+        out, err, rval = self.myrrh_os.cmd("%(realpath)s %(path)s", path=self.myrrh_os.sh_escape(path))
         ExecutionFailureCauseRVal(self, err, rval, 0, error_translate=self._os.default_errno_from_msg).check()
 
         return _cast_(out.strip())
@@ -173,7 +173,7 @@ class OsFs(AbcOsFs):
             return False
         try:
             s1 = self.lstat(path)
-            s2 = self.lstat(self.join(path, self.myrrh_os.pardirb))
+            s2 = self.lstat(self.join(path, self.myrrh_os.pardir))
         except ExecutionFailureCauseRVal:
             return False  # It doesn't exist -- so not a mount point:-)
         dev1 = s1.st_dev
@@ -188,10 +188,10 @@ class OsFs(AbcOsFs):
 
     def __utime_toolbox(self, bpath, times, follow_symlinks):
         if times is None:
-            _, err, rval = self.myrrh_os.cmdb(
-                b"%(touch)s %(symlink)s -a -m %(path)s",
-                symlink="-l" if follow_symlinks else b"",
-                path=self.myrrh_os.sh_escape_bytes(bpath),
+            _, err, rval = self.myrrh_os.cmd(
+                "%(touch)s %(symlink)s -a -m %(path)s",
+                symlink="-l" if follow_symlinks else "",
+                path=self.myrrh_os.sh_escape(bpath),
             )
 
         else:
@@ -199,21 +199,21 @@ class OsFs(AbcOsFs):
             atime = self.myrrh_os.shencode(time.strftime("%Y%m%d.%H%M%S", time.localtime(atime)))
             mtime = self.myrrh_os.shencode(time.strftime("%Y%m%d.%H%M%S", time.localtime(mtime)))
 
-            _, err, rval = self.myrrh_os.cmdb(
-                b"%(touch)s %(follow)s -a -t %(atime)s %(path)s && %(touch)s %(follow)s -m -t %(mtime)s %(path)s",
-                follow=b"-l" if follow_symlinks else b"",
+            _, err, rval = self.myrrh_os.cmd(
+                "%(touch)s %(follow)s -a -t %(atime)s %(path)s && %(touch)s %(follow)s -m -t %(mtime)s %(path)s",
+                follow="-l" if follow_symlinks else "",
                 atime=atime,
                 mtime=mtime,
-                path=self.myrrh_os.sh_escape_bytes(bpath),
+                path=self.myrrh_os.sh_escape(bpath),
             )
         return err, rval
 
     def __utime_toybox(self, bpath, times, follow_symlinks):
         if times is None:
-            _, err, rval = self.myrrh_os.cmdb(
-                b"%(touch)s %(follow)s -c -a %(path)s",
-                follow=b"" if follow_symlinks else b"-h",
-                path=self.myrrh_os.sh_escape_bytes(bpath),
+            _, err, rval = self.myrrh_os.cmd(
+                "%(touch)s %(follow)s -c -a %(path)s",
+                follow="" if follow_symlinks else "-h",
+                path=self.myrrh_os.sh_escape(bpath),
             )
 
         else:
@@ -221,22 +221,22 @@ class OsFs(AbcOsFs):
             atime = atime and self.myrrh_os.shencode(time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(atime)))
             mtime = mtime and self.myrrh_os.shencode(time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(mtime)))
 
-            cmd = b" && ".join(
+            cmd = " && ".join(
                 filter(
                     None,
                     [
-                        atime and b"%(touch)s %(follow)s -c -a -d %(atime)s %(path)s",
-                        mtime and b"%(touch)s %(follow)s -m -d %(mtime)s %(path)s",
+                        atime and "%(touch)s %(follow)s -c -a -d %(atime)s %(path)s",
+                        mtime and "%(touch)s %(follow)s -m -d %(mtime)s %(path)s",
                     ],
                 )
             )
 
-            _, err, rval = self.myrrh_os.cmdb(
+            _, err, rval = self.myrrh_os.cmd(
                 cmd,
-                follow=b"" if follow_symlinks else b"-h",
+                follow="" if follow_symlinks else "-h",
                 atime=atime,
                 mtime=mtime,
-                path=self.myrrh_os.sh_escape_bytes(bpath),
+                path=self.myrrh_os.sh_escape(bpath),
             )
         return err, rval
 
@@ -250,7 +250,7 @@ class OsFs(AbcOsFs):
                 mtime and mtime + self._epochdelta,
             )
 
-        if self.myrrh_os.getbinb[b"touch"].startswith(b"/system/bin/toolbox"):
+        if self.myrrh_os.getbin["touch"].startswith("/system/bin/toolbox"):
             _utime_cmd = self.__utime_toolbox
         else:
             _utime_cmd = self.__utime_toybox
@@ -267,15 +267,15 @@ class OsFs(AbcOsFs):
     def truncate(self, path, length):
         _path = self.myrrh_os.p(path)
         if length:
-            _, err, rval = self.myrrh_os.cmdb(
-                b"%(dd)s  bs=%(length)d count=1 skip=2 seek=1 of=%(path)s if=%(path)s\n",
+            _, err, rval = self.myrrh_os.cmd(
+                "%(dd)s  bs=%(length)d count=1 skip=2 seek=1 of=%(path)s if=%(path)s\n",
                 length=length,
-                path=self.myrrh_os.sh_escape_bytes(_path),
+                path=self.myrrh_os.sh_escape(_path),
             )
         else:
-            _, err, rval = self.myrrh_os.cmdb(
-                b'%(sh)s -c "exec 1>%(path)s"',
-                path=self.myrrh_os.sh_escape_bytes(_path),
+            _, err, rval = self.myrrh_os.cmd(
+                '%(sh)s -c "exec 1>%(path)s"',
+                path=self.myrrh_os.sh_escape(_path),
             )
 
         ExecutionFailureCauseRVal(self, err, rval, 0, path, error_translate=self._os.default_errno_from_msg).check()

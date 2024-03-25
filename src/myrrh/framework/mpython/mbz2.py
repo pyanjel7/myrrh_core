@@ -3,7 +3,7 @@ import typing
 from io import TextIOWrapper
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -15,18 +15,15 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def BZ2Compressor(self) -> local_bz2.BZ2Compressor:
-        ...
+    def BZ2Compressor(self) -> local_bz2.BZ2Compressor: ...
 
     @property
     @abstractmethod
-    def BZ2Decompressor(self) -> local_bz2.BZ2Decompressor:
-        ...
+    def BZ2Decompressor(self) -> local_bz2.BZ2Decompressor: ...
 
     @property
     @abstractmethod
-    def BZ2File(self) -> local_bz2.BZ2File:
-        ...
+    def BZ2File(self) -> local_bz2.BZ2File: ...
 
     @property
     @abstractmethod
@@ -52,16 +49,13 @@ class _interface(ABC):
         encoding=None,
         errors=None,
         newline=None,
-    ) -> TextIOWrapper | local_bz2.BZ2File:
-        ...
+    ) -> TextIOWrapper | local_bz2.BZ2File: ...
 
     @abstractmethod
-    def compress(self, data, compresslevel=9) -> typing.Any:
-        ...
+    def compress(self, data, compresslevel=9) -> typing.Any: ...
 
     @abstractmethod
-    def decompress(self, data) -> typing.Any:
-        ...
+    def decompress(self, data) -> typing.Any: ...
 
 
 class AbcBz2(_interface, AbcRuntimeDelegate):

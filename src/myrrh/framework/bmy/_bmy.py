@@ -17,7 +17,7 @@ from myrrh.utils.filemode import filemode
 
 from myrrh.framework.msh import madvsh
 
-from myrrh.core.interfaces import IHost
+from myrrh.core.interfaces import IEHost
 from myrrh.core.objects import groups
 
 from ._bmy_internal import entities
@@ -107,7 +107,6 @@ class CONFIG:
         return groups.myrrh_group
 
 
-
 def bmy_func(valid_eid_required=True, attr_name="eid", attr_type=None):
     def _(func):
         @functools.wraps(func)
@@ -132,7 +131,7 @@ def bmy_func(valid_eid_required=True, attr_name="eid", attr_type=None):
                 return func(*args, **kwargs)
 
             except BmyException as exc:
-                exc.eid = exc.eid or str(hasattr(eid, "cfg") and eid.cfg.id or eid)
+                exc.eid = exc.eid or str(hasattr(eid, "reg") and eid.reg.id or eid)
                 exc.func = func.__name__
                 raise
             except OSError:
@@ -654,7 +653,7 @@ def launch(cmd, wdir=None, *, eid: BmyEntity):
 
     """
     if not isinstance(cmd, (list, tuple)):
-        cmd = mshlex.split(cmd, posix=eid.cfg.system.os == "posix")
+        cmd = mshlex.split(cmd, posix=eid.reg.system.os == "posix")
 
     relcmd, params = cmd[0], cmd[1:]
 
@@ -672,8 +671,7 @@ def launch(cmd, wdir=None, *, eid: BmyEntity):
         log.debug('relative cmd path "%s" can not be resolve' % relcmd)
         abscmd = relcmd
 
-    cmd = [eid.runtime.myrrh_os.fsencode(a) for a in [abscmd, *params]]
-    wdir = None if wdir is None else eid.runtime.myrrh_os.fsencode(wdir)
+    cmd = [abscmd, *params]
 
     return eid.system.shell.spawn(cmd, working_dir=wdir)
 
@@ -729,14 +727,14 @@ def edit(path, nl=False, edit=None, *, eid):
     try:
         with tempfile.NamedTemporaryFile(prefix=filename, suffix=ext, delete=False, newline=nl) as tmp:
             tmpfile = tmp.name
-            eos.myrrh_syscall.stream_in(eos.fsencode(path), tmp)
+            eos.myrrh_syscall.stream_in(path, tmp)
 
         import click
 
         click.launch(tmpfile)
 
         with open(tmpfile, "rb") as tmp:
-            eos.myrrh_syscall.stream_out(eos.fsencode(path), tmp)
+            eos.myrrh_syscall.stream_out(path, tmp)
 
     finally:
         if tmpfile:
@@ -1055,7 +1053,7 @@ def setinfo(__category, *, eid: BmyEntity, **kwa):
 
     """
 
-    from myrrh.warehouse import GenericItem
+    from myrrh.warehouse.items import GenericItem
 
     item = GenericItem(type_=__category, **kwa)
 
@@ -1064,7 +1062,7 @@ def setinfo(__category, *, eid: BmyEntity, **kwa):
     except Exception:
         raise BmyInvalidParameter(eid=eid, msg="unable to serialize")
 
-    eid.cfg.append(item)
+    eid.reg.append(item)
 
 
 @bmy_func(attr_type="entity")
@@ -1093,14 +1091,13 @@ def info(name=None, *, eid: BmyEntity):
         raise BmyInvalidParameter(eid, 'invalid type for parameter "name"')
 
     infos = {
-        "id": lambda: eid.cfg.id.id,
-        "description": lambda: eid.cfg.system.description,
-        "location": lambda: (eid.cfg.host.hostname, eid.cfg.host.loc),
-        "os": lambda: eid.cfg.system.os,
+        "id": lambda: eid.reg.id.id,
+        "description": lambda: eid.reg.system.description,
+        "location": lambda: (eid.reg.host.hostname, eid.reg.host.loc),
+        "os": lambda: eid.reg.system.os,
         "services": lambda: eid._entity and eid._entity.provider.paths.get("0_") or list(),
-        "catalog": lambda: eid._entity and eid._entity.provider.paths.get("1_") or list(),
-        "cwd": lambda: eid.runtime.myrrh_os.getpath(),
-        "warehouse": lambda: ",".join(eid.cfg.keys()),
+        "cwd": lambda: eid.reg.session.cwd,
+        "warehouse": lambda: ",".join(eid.reg.keys()),
     }
 
     entries = (name,) if isinstance(name, str) else name if isinstance(name, (list, tuple)) else tuple(infos) if name is None else ()
@@ -1117,10 +1114,10 @@ def info(name=None, *, eid: BmyEntity):
         try:
             if key == "warehouse" and path:
                 path = filter(None, path.split("."))
-                cfg = eid.cfg
+                reg = eid.reg
                 for p in path:
-                    cfg = cfg[p]
-                info[entry] = cfg
+                    reg = reg[p]
+                info[entry] = reg
             else:
                 info[entry] = infos.get(entry, lambda: "na")()
 
@@ -1131,7 +1128,7 @@ def info(name=None, *, eid: BmyEntity):
 
 
 @bmy_func(attr_type="host")
-def reboot(wait=False, force=False, *, eid: IHost):
+def reboot(wait=False, force=False, *, eid: IEHost):
     """
     Reboot entity
 
@@ -1146,7 +1143,7 @@ def reboot(wait=False, force=False, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def boot(wait=False, *, eid: IHost):
+def boot(wait=False, *, eid: IEHost):
     """
     Boot an entity
 
@@ -1157,7 +1154,7 @@ def boot(wait=False, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def halt(force=False, wait=False, *, eid: IHost):
+def halt(force=False, wait=False, *, eid: IEHost):
     """
     Halt entity
 
@@ -1172,7 +1169,7 @@ def halt(force=False, wait=False, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def snap(name, *, eid: IHost):
+def snap(name, *, eid: IEHost):
     """
     Take a snapshot of an entity
 
@@ -1189,7 +1186,7 @@ def snap(name, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def resnap(name, *, eid: IHost):
+def resnap(name, *, eid: IEHost):
     """
     Restore a snapshot
 
@@ -1207,7 +1204,7 @@ def resnap(name, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def desnap(name, *, eid: IHost):
+def desnap(name, *, eid: IEHost):
     """
     Delete a snapshot
 
@@ -1221,7 +1218,7 @@ def desnap(name, *, eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def snaps(eid: IHost):
+def snaps(eid: IEHost):
     """
     Returns a list of available snapshots
 
@@ -1236,7 +1233,7 @@ def snaps(eid: IHost):
 
 
 @bmy_func(attr_type="host")
-def csnap(eid: IHost):
+def csnap(eid: IEHost):
     """
     Return name of current snapshot
 
@@ -1282,7 +1279,7 @@ def dirname(path, eid: Runtime):
 @bmy_func(attr_type="runtime")
 def abspath(path, eid: Runtime):
     "Return the absolute path of the specified filename"
-    return eid.myrrh_os.fscast(path)(eid.myrrh_os.getpathb(eid.myrrh_os.f(path)))
+    return eid.myrrh_os.fscast(path)(eid.myrrh_os.getpath(eid.myrrh_os.f(path)))
 
 
 @bmy_func(attr_type="runtime")
@@ -1292,12 +1289,12 @@ def write(path, data=b"", *, encoding=None, errors=None, eid: Runtime):
 
     if isinstance(data, str):
         if not encoding:
-            encoding = eid.myrrh_os.defaultencoding()
+            encoding = eid.myrrh_os.defaultencoding
 
         data = data.encode(encoding, errors)
 
     with io.BytesIO(data) as e:
-        eid.myrrh_syscall.stream_out(eid.myrrh_os.fsencode(path), e)
+        eid.myrrh_syscall.stream_out(path, e)
 
 
 @bmy_func(attr_type="runtime")
@@ -1311,5 +1308,5 @@ def read(path, *, binary=False, encoding=None, errors=None, eid: Runtime):
         errors = "strict"
 
     with io.BytesIO() as data:
-        eid.myrrh_syscall.stream_in(eid.myrrh_os.fsencode(path), data)
+        eid.myrrh_syscall.stream_in(path, data)
         return data.getvalue() if binary else data.getvalue().decode(encoding, errors)

@@ -1,4 +1,4 @@
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 
 __mlib__ = "AbcIo"
 
@@ -9,5 +9,4 @@ class AbcIo(AbcRuntime):
     from _io import FileIO  # type: ignore
 
     class FileIO(FileIO):  # type: ignore[no-redef]
-        def open(*a, **kwa):
-            ...
+        def open(*a, **kwa): ...

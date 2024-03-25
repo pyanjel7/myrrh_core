@@ -3,7 +3,7 @@ import json
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate, ExecutionFailureCauseRVal
+from myrrh.core.system import AbcRuntimeDelegate, ExecutionFailureCauseRVal
 from myrrh.utils import mshlex
 
 __mlib__ = "AbcSys"
@@ -14,69 +14,55 @@ class _interface(ABC):
 
     @property
     @abstractmethod
-    def flags(self) -> typing.Any:
-        ...
+    def flags(self) -> typing.Any: ...
 
     @property
     @abstractmethod
-    def maxsize(self) -> int:
-        ...
+    def maxsize(self) -> int: ...
 
     @property
     @abstractmethod
-    def hash_info(self) -> typing.Any:
-        ...
+    def hash_info(self) -> typing.Any: ...
 
     @property
     @abstractmethod
-    def _git(self) -> tuple:
-        ...
+    def _git(self) -> tuple: ...
 
     @abstractmethod
-    def implementation(self) -> tuple:
-        ...
+    def implementation(self) -> tuple: ...
 
     @property
     @abstractmethod
-    def stderr(self) -> object:
-        ...
+    def stderr(self) -> object: ...
 
     @property
     @abstractmethod
-    def stdout(self) -> object:
-        ...
+    def stdout(self) -> object: ...
 
     @property
     @abstractmethod
-    def stdin(self) -> object:
-        ...
+    def stdin(self) -> object: ...
 
     @property
     @abstractmethod
-    def __stderr__(self) -> object:
-        ...
+    def __stderr__(self) -> object: ...
 
     @property
     @abstractmethod
-    def __stdout__(self) -> object:
-        ...
+    def __stdout__(self) -> object: ...
 
     @property
     @abstractmethod
-    def __stdin__(self) -> object:
-        ...
+    def __stdin__(self) -> object: ...
 
     @abstractmethod
-    def getsizeof(self, obj: object, default: int = ...) -> int:
-        ...
+    def getsizeof(self, obj: object, default: int = ...) -> int: ...
 
     @abstractmethod
-    def exc_info(self) -> tuple:
-        ...
+    def exc_info(self) -> tuple: ...
 
     @abstractmethod
-    def audit(self, event, *args) -> None:
-        ...
+    def audit(self, event, *args) -> None: ...
 
 
 class AbcSys(_interface, AbcRuntimeDelegate):
@@ -120,7 +106,7 @@ class AbcSys(_interface, AbcRuntimeDelegate):
 
     @property
     def modules(self):
-        return self.myrrh_os.__m_runtime_cache__.modules
+        return self.myrrh_os.modules
 
     def _get_sys_attr(self, attr):
         instance_attr_name = "_%s" % attr
@@ -128,14 +114,14 @@ class AbcSys(_interface, AbcRuntimeDelegate):
         try:
             executable = self._executable
         except ExecutionFailureCauseRVal:
-            executable = b""
+            executable = ""
 
-        if getattr(self, instance_attr_name) is getattr(self.__class__, instance_attr_name) and executable != b"":
+        if getattr(self, instance_attr_name) is getattr(self.__class__, instance_attr_name) and executable != "":
             try:
-                out, err, rval = self.myrrh_os.cmdb(
-                    b'%s -c "import sys,json; print(json.dumps({n : getattr(sys, n) for n in %s if hasattr(sys, n) }))"'
+                out, err, rval = self.myrrh_os.cmd(
+                    '%s -c "import sys,json; print(json.dumps({n : getattr(sys, n) for n in %s if hasattr(sys, n) }))"'
                     % (
-                        mshlex.dquoteb(executable),
+                        mshlex.dquote(executable),
                         self.myrrh_os.shencode(self.attr_list),
                     )
                 )
@@ -190,7 +176,7 @@ class AbcSys(_interface, AbcRuntimeDelegate):
         except ExecutionFailureCauseRVal:
             pass
 
-        raise AttributeError("sys.executable not supported on %s" % self.cfg.id) from None
+        raise AttributeError("sys.executable not supported on %s" % self.reg.id) from None
 
     @property
     def platform(self):
@@ -227,10 +213,10 @@ setattr(
     AbcSys,
     "_implementation.__dict__",
     {
-        "name": b"",
+        "name": "",
         "version": AbcSys._version,
         "hexversion": 0,
-        "cache_tag": b"",
-        "_multiarch": b"",
+        "cache_tag": "",
+        "_multiarch": "",
     },
 )

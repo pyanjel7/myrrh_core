@@ -313,16 +313,18 @@ class Group(click.Group):
 
         except click.ClickException as e:
             error("[%s]: %s" % (ctx.command_path, e.format_message()))
+            raise Failure
 
         except bmy.BmyException as e:
             error(format_exc(), logging.DEBUG, eid=e.eid and str(e.eid))
             error("[%s]: %s" % (ctx.command_path, str(e)), eid=e.eid and str(e.eid))
 
+            raise Failure
+
         except Exception as e:
             error(format_exc(), logging.DEBUG)
             error(str(e))
-
-        raise Failure
+            raise Failure
 
     def get_command(self, ctx, cmd_name):
         command = self.commands.get(cmd_name, self.commands.get("-default"))

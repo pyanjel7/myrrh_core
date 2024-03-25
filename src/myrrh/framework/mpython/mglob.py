@@ -1,7 +1,7 @@
 import typing
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from . import mbuiltins
 
@@ -12,28 +12,22 @@ class _interface(ABC):
     import glob as local_glob
 
     @abstractmethod
-    def glob(self, pathname, *, root_dir=None, dir_fd=None, recursive=False, include_hidden=False) -> list[typing.AnyStr]:
-        ...
+    def glob(self, pathname, *, root_dir=None, dir_fd=None, recursive=False, include_hidden=False) -> list[typing.AnyStr]: ...
 
     @abstractmethod
-    def iglob(self, pathname, *, root_dir=None, dir_fd=None, recursive=False, include_hidden=False) -> typing.Iterator[typing.AnyStr]:
-        ...
+    def iglob(self, pathname, *, root_dir=None, dir_fd=None, recursive=False, include_hidden=False) -> typing.Iterator[typing.AnyStr]: ...
 
     @abstractmethod
-    def has_magic(self, s) -> bool:
-        ...
+    def has_magic(self, s) -> bool: ...
 
     @abstractmethod
-    def escape(self, pathname) -> str:
-        ...
+    def escape(self, pathname) -> str: ...
 
     @abstractmethod
-    def glob0(dirname, pattern) -> list:
-        ...
+    def glob0(dirname, pattern) -> list: ...
 
     @abstractmethod
-    def glob1(dirname, pattern) -> list:
-        ...
+    def glob1(dirname, pattern) -> list: ...
 
 
 class AbcGlob(_interface, AbcRuntimeDelegate):

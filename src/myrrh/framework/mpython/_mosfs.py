@@ -12,7 +12,7 @@ from collections import namedtuple
 
 
 from myrrh.utils.delegation import abstractmethod
-from myrrh.core.objects.system import (
+from myrrh.core.system import (
     MOsError,
     MIOException,
     AbcRuntime,
@@ -161,39 +161,39 @@ class AbcOsFs(AbcRuntime):
 
     @property
     def altsep(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.altsepb)
+        return self.myrrh_os.altsep
 
     @property
     def curdir(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.curdirb)
+        return self.myrrh_os.curdir
 
     @property
     def pardir(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.pardirb)
+        return self.myrrh_os.pardir
 
     @property
     def sep(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.sepb)
+        return self.myrrh_os.sep
 
     @property
     def extsep(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.extsepb)
+        return self.myrrh_os.extsep
 
     @property
     def pathsep(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.pathsepb)
+        return self.myrrh_os.pathsep
 
     @property
     def defpath(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.defpathb)
+        return self.myrrh_os.defpath
 
     @defpath.setter
     def defpath(self, value):
-        self.myrrh_os.defpathb = self.myrrh_os.fsencode(value)
+        self.myrrh_os.defpath = value
 
     @property
     def devnull(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.devnullb)
+        return self.myrrh_os.devnull
 
     def fspath(self, *a, **kwa):
         return self.myrrh_os._fspath_(*a, **kwa)
@@ -219,7 +219,7 @@ class AbcOsFs(AbcRuntime):
 
         def __repr__(self):
             if isinstance(self.__name__, bytes):
-                return b"<DirEntry '%s'>" % self.__name__
+                return "<DirEntry '%s'>" % self.__name__
             return "<DirEntry '%s'>" % self.__name__
 
         @property
@@ -255,7 +255,7 @@ class AbcOsFs(AbcRuntime):
     def mkdir(self, path, mode=0o777):
         path = self.myrrh_os.p(path)
 
-        if path.endswith((self.myrrh_os.sepb, b"/")):
+        if path.endswith((self.myrrh_os.sepb, "/")):
             path = path[:-1]
 
         if self.myrrh_os.fs.exist(path):
@@ -263,7 +263,7 @@ class AbcOsFs(AbcRuntime):
 
         dirname = self.dirname(path)
 
-        if dirname != b"" and not self.isdir(dirname):
+        if dirname != "" and not self.isdir(dirname):
             MOsError(self, errno=errno.ENOENT, args=(dirname,)).raised()
 
         try:
@@ -397,27 +397,26 @@ class AbcOsFs(AbcRuntime):
 
     def abspath(self, path):
         _cast_ = self.myrrh_os.fdcast(path)
-        return _cast_(self.myrrh_os.getpathb(path))
+        return _cast_(self.myrrh_os.getpath(path))
 
     def expanduser(self, path):
         _cast_ = self.myrrh_os.fdcast(path)
         _path = self.myrrh_os.p(path)
-        if not _path.startswith(b"~"):
+        if not _path.startswith("~"):
             return path
         home = self.myrrh_os.p(self._os.gethome())
-        _path = _path[2:] if _path.startswith(b"~/") else _path[1:]
+        _path = _path[2:] if _path.startswith("~/") else _path[1:]
         return _cast_(self.join(home, _path))
 
     @abstractmethod
-    def expandvars(self, path):
-        ...
+    def expandvars(self, path): ...
 
     def relpath(self, path, start=None):
         _cast_ = self.myrrh_os.fdcast(path)
         path = self.myrrh_os.p(path)
         start = self.myrrh_os.p(start)
         sep = self.myrrh_os.sepb
-        pardir = self.myrrh_os.pardirb
+        pardir = self.myrrh_os.pardir
         curdir = self.myrrh_os.curdirb
 
         if start is None:
@@ -470,20 +469,19 @@ class AbcOsFs(AbcRuntime):
         bpath = self.myrrh_os.p(path)
 
         if self.isdir(bpath):
-            self.myrrh_os.cwdb = self.abspath(bpath)
+            self.myrrh_os.cwd = self.abspath(bpath)
             return
 
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), _cast_(path))
 
     def getcwd(self):
-        return self.myrrh_os.fsdecode(self.myrrh_os.getpathb())
+        return self.myrrh_os.fsdecode(self.myrrh_os.getpath())
 
     def getcwdb(self):
-        return self.myrrh_os.getpathb()
+        return self.myrrh_os.getpath()
 
     @abstractmethod
-    def link(self, src, dst, *, src_dir_fd=None, dst_dir_fd=None, follow_symlinks=True):
-        ...
+    def link(self, src, dst, *, src_dir_fd=None, dst_dir_fd=None, follow_symlinks=True): ...
 
     def isabs(self, path):
         return self.myrrh_os.isabs(path)
@@ -521,20 +519,16 @@ class AbcOsFs(AbcRuntime):
         return self.myrrh_os.normpath(path)
 
     @abstractmethod
-    def listdir(self, path="."):
-        ...
+    def listdir(self, path="."): ...
 
     @abstractmethod
-    def rename(self, src, dst):
-        ...
+    def rename(self, src, dst): ...
 
     @abstractmethod
-    def replace(self, src, dst, *, src_dir_fd=None, dst_dir_fd=None):
-        ...
+    def replace(self, src, dst, *, src_dir_fd=None, dst_dir_fd=None): ...
 
     @abstractmethod
-    def _scandir_list(self, path="."):
-        ...
+    def _scandir_list(self, path="."): ...
 
     class scandir(metaclass=ImplPropertyClass):
         def __init__(self, path="."):
@@ -613,27 +607,22 @@ class AbcOsFs(AbcRuntime):
         return self._lstat(path, dir_fd=dir_fd)
 
     @abstractmethod
-    def chown(self, path, uid, gid, *, dir_fd=None, follow_symlinks=True, _trusted=False):
-        ...
+    def chown(self, path, uid, gid, *, dir_fd=None, follow_symlinks=True, _trusted=False): ...
 
     @abstractmethod
-    def chmod(self, path, mode, *, dir_fd=None, follow_symlinks=True, _trusted=False):
-        ...
+    def chmod(self, path, mode, *, dir_fd=None, follow_symlinks=True, _trusted=False): ...
 
     def lchmod(self, path, mode):
         return self.chmod(path, mode, follow_symlinks=False)
 
     @abstractmethod
-    def normcase(self, path):
-        ...
+    def normcase(self, path): ...
 
     @abstractmethod
-    def splitdrive(self, path):
-        ...
+    def splitdrive(self, path): ...
 
     @abstractmethod
-    def split(self, path):
-        ...
+    def split(self, path): ...
 
     def basename(self, path):
         return self.myrrh_os.basename(path)
@@ -642,12 +631,10 @@ class AbcOsFs(AbcRuntime):
         return self.myrrh_os.dirname(path)
 
     @abstractmethod
-    def ismount(self, path):
-        ...
+    def ismount(self, path): ...
 
     @abstractmethod
-    def realpath(self, path):
-        ...
+    def realpath(self, path): ...
 
     @abstractmethod
     def _utime(self, path, times=None, *, ns=None, dir_fd=None, follow_symlinks=True):
@@ -663,24 +650,20 @@ class AbcOsFs(AbcRuntime):
         self._utime(path, times=times, ns=ns, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
 
     @abstractmethod
-    def samefile(self, path1, path2):
-        ...
+    def samefile(self, path1, path2): ...
 
     def sameopenfile(self, fp1, fp2):
         return self.samefile(self.myrrh_os.f(fp1), self.myrrh_os.f(fp2))
 
     @property
     @abstractmethod
-    def _umask(self):
-        ...
+    def _umask(self): ...
 
     @abstractmethod
-    def umask(self, mask):
-        ...
+    def umask(self, mask): ...
 
     @abstractmethod
-    def truncate(self, path, length):
-        ...
+    def truncate(self, path, length): ...
 
     # this function is distributed under the terms of PSF licence.
     # updated to work with myrrh API.

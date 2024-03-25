@@ -10,7 +10,7 @@ the entity
 -----------
 """
 
-from myrrh.core.objects.system import AbcRuntime, _mlib_
+from myrrh.core.system import AbcRuntime, _mlib_
 
 from . import mimportlib
 

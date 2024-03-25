@@ -1,7 +1,7 @@
 from types import ModuleType
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate
+from myrrh.core.system import AbcRuntimeDelegate
 
 from myrrh.framework.mpython import mbuiltins
 
@@ -12,12 +12,10 @@ class _interface(ABC):
     import test.support.import_helper as local_import_helper  # type: ignore[import-not-found]
 
     @abstractmethod
-    def import_module(self, name, deprecated=False, *, required_on=()) -> ModuleType:
-        ...
+    def import_module(self, name, deprecated=False, *, required_on=()) -> ModuleType: ...
 
     @abstractmethod
-    def make_legacy_pyc(self, name, deprecated=False, *, required_on=()) -> ModuleType:
-        ...
+    def make_legacy_pyc(self, name, deprecated=False, *, required_on=()) -> ModuleType: ...
 
 
 class AbcImportHelper(_interface, AbcRuntimeDelegate):

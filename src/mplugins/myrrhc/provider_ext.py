@@ -23,8 +23,7 @@ def list_():
 
 
 @provider.group()
-def new():
-    ...
+def new(): ...
 
 
 for pname in sorted(ProviderRegistry().providers, key=lambda n: n[0]):

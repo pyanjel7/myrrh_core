@@ -2,9 +2,18 @@ import re
 import os
 
 
-from subprocess import list2cmdline as _list2cmdline
+from subprocess import list2cmdline
 
-__all__ = ["split"]
+__all__ = [
+    "split",
+    "list2cmdline",
+    "split",
+    "shcmd",
+    "winshell_escape_for_cmd_exe",
+    "winshell_escape_for_stringyfication_in_cmd",
+    "quote",
+    "dquote",
+]
 
 
 # function copy from stackoverflow, Mar 9, 2016, author: kxr
@@ -12,7 +21,7 @@ __all__ = ["split"]
 # licence link : https://creativecommons.org/licenses/by-sa/3.0/
 # updated to work with bytes argument
 # original version : https://stackoverflow.com/questions/33560364/python-windows-parsing-command-lines-with-shlex/35900070#35900070
-def _split(s, posix, RE_CMD_LEX, qs_replace, word_replace, empty_accu):
+def _split(s: str, posix, RE_CMD_LEX, qs_replace, word_replace, empty_accu):
     args = []
     accu = None
     for qs, qss, esc, pipe, word, white, fail in re.findall(RE_CMD_LEX, s):
@@ -49,31 +58,7 @@ def _split(s, posix, RE_CMD_LEX, qs_replace, word_replace, empty_accu):
 # licence link : https://creativecommons.org/licenses/by-sa/3.0/
 # updated to work with bytes argument
 # original version : https://stackoverflow.com/questions/33560364/python-windows-parsing-command-lines-with-shlex/35900070#35900070
-def splitb(s, posix=(os.name == "posix")):
-    """
-    Multi-platform variant of shlex.split for command-line splitting
-    For use with subprocess, for argv injection etc. Using fast REGEX
-    """
-    if posix:
-        RE_CMD_LEX = rb""""((?:\\["\\]|[^"])*)"|'([^']*)'|(\\.)|(&&?|\|\|?|\d?>\>?|[<]<?)|([^\s'"\\&|<>]+)|(\s+)|(.)"""
-    else:
-        RE_CMD_LEX = rb""""((?:""|\\["\\]|[^"])*)"?()|(\\\\(?=\\*")|\\")|(&&?|\|\|?|\d?\>\>?|[<]<?)|([^\s"&|<>]+)|(\s+)|(.)"""
-
-    def qs_replace(qs):
-        return qs.replace(b'\\"', b'"').replace(b"\\\\", b"\\")
-
-    def word_replace(word):
-        return word.replace(b'""', b'"')
-
-    return _split(s, posix, RE_CMD_LEX, qs_replace, word_replace, empty_accu=b"")
-
-
-# function copy from stackoverflow, Mar 9, 2016, author: kxr
-# this function is distributed under the terms of CC BY-SA 3.0 licence.
-# licence link : https://creativecommons.org/licenses/by-sa/3.0/
-# simplified version
-# original version : https://stackoverflow.com/questions/33560364/python-windows-parsing-command-lines-with-shlex/35900070#35900070
-def splits(s, posix=(os.name == "posix")):
+def split(s: str, posix=(os.name == "posix")):
     """
     Multi-platform variant of shlex.split for command-line splitting
     For use with subprocess, for argv injection etc. Using fast REGEX
@@ -92,23 +77,11 @@ def splits(s, posix=(os.name == "posix")):
     return _split(s, posix, RE_CMD_LEX, qs_replace, word_replace, empty_accu="")
 
 
-def split(s, posix=(os.name == "posix")):
-    if isinstance(s, bytes):
-        return splitb(s, posix)
-    if isinstance(s, str):
-        return splits(s, posix)
-
-    raise TypeError('"s" must be of type str or bytes not "%s"' % type(s))
-
-
 _meta_chars = '()%!^"<>&|'
 
 _meta_re = re.compile("(" + "|".join(re.escape(char) for char in list(_meta_chars)) + ")")
 _meta_map = {char: "^%s" % char for char in _meta_chars}
-
-_meta_re_b = re.compile(b"(" + b"|".join(re.escape(char).encode() for char in list(_meta_chars)) + b")")
-_meta_map_b = {char.encode(): b"^%s" % char.encode() for char in _meta_chars}
-_meta_map_stringify_b = {char.encode(): b'"%s"' % char.encode() for char in _meta_chars}
+_meta_map_stringify = {char: '"%s"' % char for char in _meta_chars}
 
 
 # function copy from stackoverflow, Mar 23, 2015, author: Holder Just
@@ -116,7 +89,7 @@ _meta_map_stringify_b = {char.encode(): b'"%s"' % char.encode() for char in _met
 # licence link : https://creativecommons.org/licenses/by-sa/3.0/
 # updated to work with bytes argument
 # original version : https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows/29215357#29215357
-def winshell_escape_for_cmd_exe_b(arg):
+def winshell_escape_for_cmd_exe(arg):
     # Escape an argument string to be suitable to be passed to cmd.exe on Windows
     #
     # This method takes an argument that is expected to already be properly
@@ -129,7 +102,7 @@ def winshell_escape_for_cmd_exe_b(arg):
     # @program arg [String] a single command line argument to escape for cmd.exe
     # @return [String] an escaped string suitable to be passed as a program argument to cmd.exe
 
-    return _meta_re_b.sub(lambda m: _meta_map_b[m.group(1)], arg)
+    return _meta_re.sub(lambda m: _meta_map[m.group(1)], arg)
 
 
 # function copy from stackoverflow, Mar 23, 2015, author: Holder Just
@@ -137,51 +110,41 @@ def winshell_escape_for_cmd_exe_b(arg):
 # licence link : https://creativecommons.org/licenses/by-sa/3.0/
 # updated to work with bytes argument
 # original version : https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows/29215357#29215357
-def winshell_escape_for_stringyfication_in_cmdb(arg):
-    return _meta_re_b.sub(lambda m: _meta_map_stringify_b[m.group(1)], arg)
+def winshell_escape_for_stringyfication_in_cmd(arg: str):
+    return _meta_re.sub(lambda m: _meta_map_stringify[m.group(1)], arg)
 
 
-def list2cmdlineb(seq, encode=os.fsencode, decode=os.fsdecode):
-    if not len(seq):
-        return b""
-
-    if isinstance(seq[0], bytes):
-        return encode(_list2cmdline(map(decode, seq)))
-
-    return _list2cmdline(seq)
+_find_unsafe = re.compile(r"[^\w@%\+=:,\./\-<>]", re.ASCII).search
 
 
-_find_unsafe = re.compile(rb"[^\w@%\+=:,\./\-<>]", re.ASCII).search
-
-
-def quoteb(s):
+def quote(s: str):
     """Return a shell-escaped version of the string *s*."""
     if not s:
-        return b"''"
+        return "''"
     if _find_unsafe(s) is None:
         return s
 
     # use single quotes, and put single quotes into double quotes
     # the string $'b is then quoted as '$'"'"'b'
-    return b"'" + s.replace(b"'", b"'\"'\"'") + b"'"
+    return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
-def dquoteb(s):
+def dquote(s: str):
     """Return a shell-escaped version of the string *s*."""
     if not s:
-        return b'""'
+        return '""'
     if _find_unsafe(s) is None:
         return s
 
     # use single quotes, and put single quotes into double quotes
     # the string $'b is then quoted as '$'"'"'b'
-    return b'"' + s + b'"'
+    return '"' + s + '"'
 
 
-patternb = re.compile(rb"{(\w+)(?::([^}]*}))?}")
+pattern = re.compile(r"{(\w+)(?::([^}]*}))?}")
 
 
-def shcmdb(template: bytes, options: dict[bytes, bytes]):
+def shcmd(template: str, options: dict[str, str]):
     """generate a command line using the template string
 
     TEMPLATE= anystring|OPTIONAL|TEMPLATE
@@ -190,30 +153,30 @@ def shcmdb(template: bytes, options: dict[bytes, bytes]):
     KEYPATTERN = anystring|KEY|KEYPATTERN
 
     examples:
-        template=b"ls {PATH}" with options={b'PATH': b'/path'} => b'ls /path'
-        template=b"ls {PATH}" with options={b'ANOTHER': b'/path'} => b'ls '
-        template=b"ls {PATH: -l {PATH}}" with options={b'PATH': b'/path'} => b'ls -l /path'
-        template=b"ls {PATH: -l {PATH}}" with options={b'ANOTHER': b'/path'} => b'ls '
+        template="ls {PATH}" with options={'PATH': '/path'} => 'ls /path'
+        template="ls {PATH}" with options={'ANOTHER': '/path'} => 'ls '
+        template="ls {PATH: -l {PATH}}" with options={'PATH': '/path'} => 'ls -l /path'
+        template="ls {PATH: -l {PATH}}" with options={'ANOTHER': '/path'} => 'ls '
 
     Args:
-        template (bytes): commandline template
+        template (str): commandline template
         options (dict[bytes, bytes]): a dictionary with optional key value
 
     Returns:
         bytes: formatted command line
     """
     cmd = template
-    for opt in re.finditer(patternb, template):
+    for opt in re.finditer(pattern, template):
         optname, optstring = opt.groups()
-        optflag = b"{%s}" % optname
+        optflag = "{%s}" % optname
         optstring = optstring or optflag
 
         if optname in options:
-            optformatted = b"%%(%s)s" % optname
+            optformatted = "%%(%s)s" % optname
             optformatted = optstring.replace(optflag, optformatted)
             cmd = cmd.replace(opt.group(), optformatted)
 
         else:
-            cmd = cmd.replace(opt.group(), b"")
+            cmd = cmd.replace(opt.group(), "")
 
     return cmd % options

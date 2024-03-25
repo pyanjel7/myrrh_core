@@ -143,15 +143,15 @@ def getch():
     with getchIt() as it:
         try:
             ch = next(it)
-            return b"" if ch is None else ch
+            return "" if ch is None else ch
         except:  # noqa: E722
-            return b""
+            return ""
 
 
 def getche():
     with getcheIt() as it:
         ch = next(it)
-        return b"" if ch is None else ch
+        return "" if ch is None else ch
 
 
 def abort():

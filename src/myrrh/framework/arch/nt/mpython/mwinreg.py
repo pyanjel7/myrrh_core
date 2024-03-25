@@ -3,9 +3,9 @@ import threading
 from myrrh.utils import mshlex
 
 from myrrh.utils import mstring
-from myrrh.core.objects.system import ExecutionFailureCauseRVal
+from myrrh.core.system import ExecutionFailureCauseRVal
 
-from myrrh.core.objects.system import AbcRuntime
+from myrrh.core.system import AbcRuntime
 from myrrh.framework.mpython import mimportlib
 
 
@@ -136,9 +136,8 @@ class WinReg(AbcRuntime):
         def cmd(self, *a, **kwa):
             return self.myrrh_os.cmd(*a, **kwa)
 
-        def sh_escape_bytes(self, bytes_or_str):
-            value = self.myrrh_os.fsencode(bytes_or_str)
-            return mshlex.winshell_escape_for_stringyfication_in_cmdb(value)
+        def sh_escape(self, value) -> str:
+            return mshlex.winshell_escape_for_stringyfication_in_cmd(value)
 
         def _find_value_index(self, name):
             for a in self._values:
@@ -157,8 +156,8 @@ class WinReg(AbcRuntime):
             key_path = self.myrrh_os.p(self.path)
 
             o, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s QUERY "%(path)s" /ve',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
+                '%(reg)s QUERY "%(path)s" /ve',
+                path=self.myrrh_os.sh_escape(key_path),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, key_path).check()
 
@@ -172,8 +171,8 @@ class WinReg(AbcRuntime):
 
             if o is None:
                 o, e, r = self.myrrh_os.cmd(
-                    b'%(reg_utf8)s QUERY "%(path)s"',
-                    path=self.myrrh_os.sh_escape_bytes(key_path),
+                    '%(reg)s QUERY "%(path)s"',
+                    path=self.myrrh_os.sh_escape(key_path),
                 )
                 try:
                     ExecutionFailureCauseRVal(self, e, r, 0, key_path).check()
@@ -211,8 +210,8 @@ class WinReg(AbcRuntime):
 
         def _create(self):
             o, e, r = self.myrrh_os.cmd(
-                b'( %(reg_utf8)s QUERY "%(path)s" 2>NUL ) || ( ( %(reg_utf8)s ADD "%(path)s" 1>NUL ) && ( %(reg_utf8)s DELETE "%(path)s" /ve /f 1>NUL ) && %(reg_utf8)s QUERY "%(path)s")',
-                path=self.myrrh_os.sh_escape_bytes(self.key_path),
+                '( %(reg)s QUERY "%(path)s" 2>NUL ) || ( ( %(reg)s ADD "%(path)s" 1>NUL ) && ( %(reg)s DELETE "%(path)s" /ve /f 1>NUL ) && %(reg)s QUERY "%(path)s")',
+                path=self.myrrh_os.sh_escape(self.key_path),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
             self._query(o)
@@ -221,8 +220,8 @@ class WinReg(AbcRuntime):
             key_path = self.myrrh_os.p(self.path)
 
             _, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s DELETE "%(path)s" /f',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
+                '%(reg)s DELETE "%(path)s" /f',
+                path=self.myrrh_os.sh_escape(key_path),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
 
@@ -231,9 +230,9 @@ class WinReg(AbcRuntime):
             value = self.myrrh_os.shdecode(value)
 
             o, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s DELETE  "%(path)s" /v "%(value)s" /f && %(reg_utf8)s QUERY "%(path)s"',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
-                value=self.myrrh_os.sh_escape_bytes(value),
+                '%(reg)s DELETE  "%(path)s" /v "%(value)s" /f && %(reg)s QUERY "%(path)s"',
+                path=self.myrrh_os.sh_escape(key_path),
+                value=self.myrrh_os.sh_escape(value),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
             self._query(o)
@@ -243,9 +242,9 @@ class WinReg(AbcRuntime):
             filename = self.myrrh_os.p(filename)
 
             o, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s LOAD "%(path)s" "%(filename)s" && %(reg_utf8)s QUERY "%(path)s"',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
-                value=self.myrrh_os.sh_escape_bytes(filename),
+                '%(reg)s LOAD "%(path)s" "%(filename)s" && %(reg)s QUERY "%(path)s"',
+                path=self.myrrh_os.sh_escape(key_path),
+                value=self.myrrh_os.sh_escape(filename),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
             self._query(o)
@@ -255,9 +254,9 @@ class WinReg(AbcRuntime):
             filename = self.myrrh_os.p(filename)
 
             _, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s SAVE "%(path)s" "%(filename)s"',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
-                value=self.myrrh_os.sh_escape_bytes(filename),
+                '%(reg)s SAVE "%(path)s" "%(filename)s"',
+                path=self.myrrh_os.sh_escape(key_path),
+                value=self.myrrh_os.sh_escape(filename),
             )
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
 
@@ -271,11 +270,11 @@ class WinReg(AbcRuntime):
             svalue = self.myrrh_os.shdecode(value)
 
             o, e, r = self.myrrh_os.cmd(
-                b'%(reg_utf8)s ADD "%(path)s"  %(value_name)s /t %(type)s /d "%(value)s" /f && %(reg_utf8)s QUERY "%(path)s" ',
-                path=self.myrrh_os.sh_escape_bytes(key_path),
-                value=self.myrrh_os.sh_escape_bytes(svalue),
-                type=self.myrrh_os.sh_escape_bytes(stype),
-                value_name=(b'/v "%s"' % self.myrrh_os.sh_escape_bytes(value_name)) if value_name else b"",
+                '%(reg)s ADD "%(path)s"  %(value_name)s /t %(type)s /d "%(value)s" /f && %(reg)s QUERY "%(path)s" ',
+                path=self.myrrh_os.sh_escape(key_path),
+                value=self.myrrh_os.sh_escape(svalue),
+                type=self.myrrh_os.sh_escape(stype),
+                value_name=('/v "%s"' % self.myrrh_os.sh_escape(value_name)) if value_name else "",
             )
 
             ExecutionFailureCauseRVal(self, e, r, 0, self.path).check()
@@ -475,7 +474,7 @@ class WinReg(AbcRuntime):
         raise OSError(259, "No data found")
 
     def ExpandEnvironmentStrings(self, str):
-        out, err, rval = self.myrrh_os.cmd(b"%(echo)s %(str)s", str=self.myrrh_os.shencode(str))
+        out, err, rval = self.myrrh_os.cmd("%(echo)s %(str)s", str=self.myrrh_os.shencode(str))
         ExecutionFailureCauseRVal(self, err, rval, 0).check()
         return out.strip()
 

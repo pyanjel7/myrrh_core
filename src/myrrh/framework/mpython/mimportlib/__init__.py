@@ -4,7 +4,7 @@ import typing
 import mlib
 
 from myrrh.utils.delegation import abstractmethod, ABC
-from myrrh.core.objects.system import AbcRuntimeDelegate, _mlib_
+from myrrh.core.system import AbcRuntimeDelegate, _mlib_
 
 __mlib__ = "AbcImportLib"
 
@@ -39,24 +39,19 @@ class _interface(ABC):
     import importlib.util
 
     @abstractmethod
-    def invalidate_caches(self) -> None:
-        ...
+    def invalidate_caches(self) -> None: ...
 
     @abstractmethod
-    def find_loader(name, path=None) -> typing.Any:
-        ...
+    def find_loader(name, path=None) -> typing.Any: ...
 
     @abstractmethod
-    def import_module(name, package=None) -> typing.Any:
-        ...
+    def import_module(name, package=None) -> typing.Any: ...
 
     @abstractmethod
-    def reload(module) -> typing.Any:
-        ...
+    def reload(module) -> typing.Any: ...
 
     @abstractmethod
-    def __import__(name, globals=None, locals=None, fromlist=(), level=0) -> typing.Any:
-        ...
+    def __import__(name, globals=None, locals=None, fromlist=(), level=0) -> typing.Any: ...
 
 
 class AbcImportLib(_interface, AbcRuntimeDelegate):
@@ -88,8 +83,8 @@ class AbcImportLib(_interface, AbcRuntimeDelegate):
 
         try:
             return mod._mlib_cls(self)
-        except (NotImplementedError, TypeError, AttributeError):
-            raise ImportError
+        except (NotImplementedError, TypeError, AttributeError) as e:
+            raise ImportError(e).with_traceback(e.__traceback__)
 
     def _myrrh__import__(self, name, globals=None, locals=None, fromlist=(), level=0):
         if level:
@@ -123,8 +118,8 @@ class AbcImportLib(_interface, AbcRuntimeDelegate):
                             parent=mlib.py,
                         )
                     self.sys.modules[mod_name] = new_mod
-                except (NotImplementedError, TypeError, AttributeError) as e:
-                    raise ImportError(e)
+                except Exception as e:
+                    raise ImportError(e).with_traceback(e.__traceback__)
 
                 mod = mlib.py
                 fulln = ""

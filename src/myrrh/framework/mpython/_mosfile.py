@@ -2,7 +2,7 @@ import errno
 import array
 import os
 
-from myrrh.core.objects.system import MIOException, AbcRuntime
+from myrrh.core.system import MIOException, AbcRuntime
 
 from . import mimportlib
 
@@ -139,13 +139,13 @@ class AbcOsFile(AbcRuntime):
     def open(self, path, flags, mode=0o777, *, dir_fd=None) -> int:
         file = self.myrrh_os.p(path, dir_fd=dir_fd)
 
-        if b"\0" in file:
+        if "\0" in file:
             raise ValueError("embedded null character")
 
         mode = mode & ~self.osfs._umask
-        abspath = self.myrrh_os.getpathb(file)
+        abspath = self.myrrh_os.getpath(file)
 
-        if b"\x00" in abspath:
+        if "\x00" in abspath:
             raise ValueError("embedded null byte")
 
         # check file
